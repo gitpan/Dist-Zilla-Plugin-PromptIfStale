@@ -39,6 +39,7 @@
       },
       "runtime" : {
          "requires" : {
+            "Cwd" : "0",
             "Dist::Zilla::Role::BeforeBuild" : "0",
             "Dist::Zilla::Role::BeforeRelease" : "0",
             "Encode" : "0",
@@ -50,6 +51,7 @@
             "Moose::Util::TypeConstraints" : "0",
             "MooseX::Types::LoadableClass" : "0",
             "MooseX::Types::Moose" : "0",
+            "Path::Tiny" : "0",
             "namespace::autoclean" : "0",
             "perl" : "5.006",
             "strict" : "0",
@@ -71,7 +73,7 @@
    "provides" : {
       "Dist::Zilla::Plugin::PromptIfStale" : {
          "file" : "lib/Dist/Zilla/Plugin/PromptIfStale.pm",
-         "version" : "0.001"
+         "version" : "0.002"
       }
    },
    "release_status" : "stable",
@@ -87,7 +89,7 @@
          "web" : "https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale"
       }
    },
-   "version" : "0.001",
+   "version" : "0.002",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.019002"
