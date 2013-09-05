@@ -1,25 +1,25 @@
 use strict;
 use warnings;
 package Dist::Zilla::Plugin::PromptIfStale;
-{
-  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.002';
-}
-# git description: v0.001-6-g8df9978
-
 BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
-# ABSTRACT: Check at build time if modules are out of date
+{
+  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.003';
+}
+# git description: v0.002-12-g008d363
+
+# ABSTRACT: Check at build/release time if modules are out of date
 
 use Moose;
 with 'Dist::Zilla::Role::BeforeBuild',
     'Dist::Zilla::Role::BeforeRelease';
 
 use Moose::Util::TypeConstraints;
-use MooseX::Types::Moose qw(ArrayRef Bool);
-use MooseX::Types::LoadableClass 'LoadableClass';
+use MooseX::Types::Moose qw(ArrayRef Bool Str);
 use List::MoreUtils 'uniq';
-use Module::Runtime 'use_module';
+use Module::Runtime 'module_notional_filename';
+use Class::Load 'try_load_class';
 use version;
 use Path::Tiny;
 use Cwd;
@@ -41,7 +41,7 @@ has phase => (
 );
 
 has modules => (
-    isa => ArrayRef[LoadableClass],
+    isa => ArrayRef[Str],
     traits => [ 'Array' ],
     handles => { modules => 'elements' },
     lazy => 1,
@@ -69,25 +69,49 @@ sub check_modules
 {
     my $self = shift;
 
-    my @modules = $self->check_all_plugins
-        ? uniq map { blessed $_ } @{ $self->zilla->plugins }
-        : $self->modules;
+    my @modules = (
+        $self->modules,
+        $self->check_all_plugins
+            ? uniq map { blessed $_ } @{ $self->zilla->plugins }
+            : (),
+    );
 
     foreach my $module (@modules)
     {
-        # ignore modules in the dist currently being built
-        (my $file = $module) =~ s{::}{/}g;
-        $file .= '.pm';
-        $self->log_debug($module . ' provided locally; skipping version check'), next
-            unless path($INC{$file})->relative(getcwd) =~ m/^\.\./;
+        if (not try_load_class($module))
+        {
+            my $continue = $self->zilla->chrome->prompt_yn(
+                $module . ' is not installed. Continue anyway?',
+                { default => 0 },
+            );
 
-        $self->log_debug('comparing indexed vs. local version for ' . $module);
+            $self->log_fatal('Aborting build') if not $continue;
+            next;
+        }
+
+        # ignore modules in the dist currently being built
+        $self->log_debug($module . ' provided locally; skipping version check'), next
+            unless path($INC{module_notional_filename($module)})->relative(getcwd) =~ m/^\.\./;
 
         my $indexed_version = $self->_indexed_version($module);
-        my $local_version = version->parse(use_module($module)->VERSION);
+        my $local_version = version->parse($module->VERSION);
 
-        if (defined $indexed_version
-            and defined $local_version
+        $self->log_debug('comparing indexed vs. local version for ' . $module
+            . ': indexed=' . ($indexed_version // 'undef')
+            . '; local version=' . ($local_version // 'undef'));
+
+        if (not defined $indexed_version)
+        {
+            my $continue = $self->zilla->chrome->prompt_yn(
+                $module . ' is not indexed. Continue anyway?',
+                { default => 0 },
+            );
+
+            $self->log_fatal('Aborting build') if not $continue;
+            next;
+        }
+
+        if (defined $local_version
             and $local_version < $indexed_version)
         {
             my $continue = $self->zilla->chrome->prompt_yn(
@@ -132,11 +156,11 @@ __END__
 
 =head1 NAME
 
-Dist::Zilla::Plugin::PromptIfStale - Check at build time if modules are out of date
+Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are out of date
 
 =head1 VERSION
 
-version 0.002
+version 0.003
 
 =head1 SYNOPSIS
 
@@ -169,6 +193,9 @@ build time.
 
 Indicates whether the checks are performed at I<build> or I<release> time
 (defaults to I<release>).
+
+(Remember that you can use different settings for different phases by employing
+this plugin twice, with different names.)
 
 =item * C<module>
 

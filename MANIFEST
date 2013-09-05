@@ -11,10 +11,14 @@ lib/Dist/Zilla/Plugin/PromptIfStale.pm
 t/00-check-deps.t
 t/00-compile.t
 t/01-basic.t
+t/02-not-installed.t
+t/03-bunk-module.t
+t/04-two-configs.t
 weaver.ini
 xt/author/pod-spell.t
 xt/release/changes_has_content.t
 xt/release/clean-namespaces.t
+xt/release/cpan-changes.t
 xt/release/distmeta.t
 xt/release/eol.t
 xt/release/kwalitee.t

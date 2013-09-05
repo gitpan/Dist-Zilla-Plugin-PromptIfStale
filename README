@@ -1,9 +1,9 @@
 
 
 This archive contains the distribution Dist-Zilla-Plugin-PromptIfStale,
-version 0.002:
+version 0.003:
 
-  Check at build time if modules are out of date
+  Check at build/release time if modules are out of date
 
 This software is copyright (c) 2013 by Karen Etheridge.
 

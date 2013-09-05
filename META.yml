@@ -1,18 +1,22 @@
 ---
-abstract: 'Check at build time if modules are out of date'
+abstract: 'Check at build/release time if modules are out of date'
 author:
   - 'Karen Etheridge <ether@cpan.org>'
 build_requires:
   CPAN::Meta::Check: 0.007
-  Capture::Tiny: 0
+  IO::Handle: 0
+  IPC::Open3: 0
+  Moose::Util: 0
   Test::CheckDeps: 0.006
+  Test::DZil: 0
+  Test::Deep: 0
+  Test::Fatal: 0
   Test::More: 0.94
   Test::Warnings: 0
-  blib: 0
 configure_requires:
-  Module::Build::Tiny: 0.025
+  Module::Build::Tiny: 0.026
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300035, CPAN::Meta::Converter version 2.132140'
+generated_by: 'Dist::Zilla version 4.300037, CPAN::Meta::Converter version 2.132140'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -26,8 +30,9 @@ no_index:
 provides:
   Dist::Zilla::Plugin::PromptIfStale:
     file: lib/Dist/Zilla/Plugin/PromptIfStale.pm
-    version: 0.002
+    version: 0.003
 requires:
+  Class::Load: 0
   Cwd: 0
   Dist::Zilla::Role::BeforeBuild: 0
   Dist::Zilla::Role::BeforeRelease: 0
@@ -38,11 +43,10 @@ requires:
   Module::Runtime: 0
   Moose: 0
   Moose::Util::TypeConstraints: 0
-  MooseX::Types::LoadableClass: 0
   MooseX::Types::Moose: 0
   Path::Tiny: 0
   namespace::autoclean: 0
-  perl: 5.006
+  perl: 5.010
   strict: 0
   version: 0
   warnings: 0
@@ -50,51 +54,42 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-Plugin-PromptIfStale
   homepage: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale
   repository: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale.git
-version: 0.002
+version: 0.003
 x_Dist_Zilla:
   perl:
-    version: 5.019002
+    version: 5.019003
   plugins:
+    -
+      class: Dist::Zilla::Plugin::Bootstrap::lib
+      config:
+        Dist::Zilla::Plugin::Bootstrap::lib:
+          try_built: ~
+      name: Bootstrap::lib
+      version: 0.03000200
     -
       class: Dist::Zilla::Plugin::Git::NextVersion
       name: '@Author::ETHER/Git::NextVersion'
       version: 2.014
     -
-      class: Dist::Zilla::Plugin::GithubMeta
-      name: '@Author::ETHER/GithubMeta'
-      version: 0.30
+      class: Dist::Zilla::Plugin::PromptIfStale
+      name: '@Author::ETHER/build'
+      version: ~
     -
-      class: Dist::Zilla::Plugin::AutoMetaResources
-      name: '@Author::ETHER/AutoMetaResources'
-      version: 1.20
-    -
-      class: Dist::Zilla::Plugin::Authority
-      name: '@Author::ETHER/Authority'
-      version: 1.006
-    -
-      class: Dist::Zilla::Plugin::MetaNoIndex
-      name: '@Author::ETHER/MetaNoIndex'
-      version: 4.300035
-    -
-      class: Dist::Zilla::Plugin::MetaProvides::Package
-      name: '@Author::ETHER/MetaProvides::Package'
-      version: 1.14000003
-    -
-      class: Dist::Zilla::Plugin::MetaConfig
-      name: '@Author::ETHER/MetaConfig'
-      version: 4.300035
+      class: Dist::Zilla::Plugin::PromptIfStale
+      name: '@Author::ETHER/release'
+      version: ~
     -
       class: Dist::Zilla::Plugin::ExecDir
       name: '@Author::ETHER/ExecDir'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::ShareDir
       name: '@Author::ETHER/ShareDir'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::FileFinder::ByName
       name: '@Author::ETHER/Examples'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::Git::GatherDir
       name: '@Author::ETHER/Git::GatherDir'
@@ -102,23 +97,23 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::MetaYAML
       name: '@Author::ETHER/MetaYAML'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::MetaJSON
       name: '@Author::ETHER/MetaJSON'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::License
       name: '@Author::ETHER/License'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::Readme
       name: '@Author::ETHER/Readme'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::Manifest
       name: '@Author::ETHER/Manifest'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::Test::Compile
       config:
@@ -129,7 +124,7 @@ x_Dist_Zilla:
             - ':ExecFiles'
             - '@Author::ETHER/Examples'
       name: '@Author::ETHER/Test::Compile'
-      version: 2.018
+      version: 2.025
     -
       class: Dist::Zilla::Plugin::Test::CheckDeps
       name: '@Author::ETHER/Test::CheckDeps'
@@ -145,11 +140,15 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::MetaTests
       name: '@Author::ETHER/MetaTests'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::Test::Version
       name: '@Author::ETHER/Test::Version'
       version: 0.002004
+    -
+      class: Dist::Zilla::Plugin::Test::CPAN::Changes
+      name: '@Author::ETHER/Test::CPAN::Changes'
+      version: 0.008
     -
       class: Dist::Zilla::Plugin::Test::ChangesHasContent
       name: '@Author::ETHER/Test::ChangesHasContent'
@@ -165,11 +164,11 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::PodSyntaxTests
       name: '@Author::ETHER/PodSyntaxTests'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::PodCoverageTests
       name: '@Author::ETHER/PodCoverageTests'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::Test::PodSpelling
       name: '@Author::ETHER/Test::PodSpelling'
@@ -179,13 +178,17 @@ x_Dist_Zilla:
       name: '@Author::ETHER/Test::Pod::No404s'
       version: 1.001
     -
+      class: Dist::Zilla::Plugin::Test::Kwalitee
+      name: '@Author::ETHER/Test::Kwalitee'
+      version: 2.06
+    -
       class: Dist::Zilla::Plugin::PruneCruft
       name: '@Author::ETHER/PruneCruft'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::ManifestSkip
       name: '@Author::ETHER/ManifestSkip'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::Git::Describe
       name: '@Author::ETHER/Git::Describe'
@@ -193,7 +196,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::PkgVersion
       name: '@Author::ETHER/PkgVersion'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::PodWeaver
       name: '@Author::ETHER/PodWeaver'
@@ -201,11 +204,35 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::NextRelease
       name: '@Author::ETHER/NextRelease'
-      version: 4.300035
+      version: 4.300037
+    -
+      class: Dist::Zilla::Plugin::GithubMeta
+      name: '@Author::ETHER/GithubMeta'
+      version: 0.34
+    -
+      class: Dist::Zilla::Plugin::AutoMetaResources
+      name: '@Author::ETHER/AutoMetaResources'
+      version: 1.20
+    -
+      class: Dist::Zilla::Plugin::Authority
+      name: '@Author::ETHER/Authority'
+      version: 1.006
+    -
+      class: Dist::Zilla::Plugin::MetaNoIndex
+      name: '@Author::ETHER/MetaNoIndex'
+      version: 4.300037
+    -
+      class: Dist::Zilla::Plugin::MetaProvides::Package
+      name: '@Author::ETHER/MetaProvides::Package'
+      version: 1.14000003
+    -
+      class: Dist::Zilla::Plugin::MetaConfig
+      name: '@Author::ETHER/MetaConfig'
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::AutoPrereqs
       name: '@Author::ETHER/AutoPrereqs'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::MinimumPerl
       name: '@Author::ETHER/MinimumPerl'
@@ -217,7 +244,7 @@ x_Dist_Zilla:
           phase: test
           type: requires
       name: '@Author::ETHER/Test::CheckDeps, indirect'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::Prereqs
       config:
@@ -225,7 +252,7 @@ x_Dist_Zilla:
           phase: develop
           type: requires
       name: '@Author::ETHER/installer_requirements'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::ReadmeAnyFromPod
       name: '@Author::ETHER/ReadmeAnyFromPod'
@@ -273,11 +300,11 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::TestRelease
       name: '@Author::ETHER/TestRelease'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::UploadToCPAN
       name: '@Author::ETHER/UploadToCPAN'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::Git::Commit
       name: '@Author::ETHER/Git::Commit'
@@ -301,42 +328,38 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::ConfirmRelease
       name: '@Author::ETHER/ConfirmRelease'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::PromptIfStale
       name: PromptIfStale
       version: ~
     -
-      class: Dist::Zilla::Plugin::Test::Kwalitee
-      name: Test::Kwalitee
-      version: 2.05
-    -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':InstallModules'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':IncModules'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':TestFiles'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':ExecFiles'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':ShareFiles'
-      version: 4.300035
+      version: 4.300037
     -
       class: Dist::Zilla::Plugin::FinderCode
       name: ':MainModule'
-      version: 4.300035
+      version: 4.300037
   zilla:
     class: Dist::Zilla::Dist::Builder
     config:
       is_trial: 0
-    version: 4.300035
+    version: 4.300037
 x_authority: cpan:ETHER
