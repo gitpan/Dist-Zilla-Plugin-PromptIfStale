@@ -5,19 +5,20 @@ BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
 {
-  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.003';
+  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.004';
 }
-# git description: v0.002-12-g008d363
+# git description: v0.003-10-g35beb1d
 
 # ABSTRACT: Check at build/release time if modules are out of date
 
 use Moose;
 with 'Dist::Zilla::Role::BeforeBuild',
+    'Dist::Zilla::Role::AfterBuild',
     'Dist::Zilla::Role::BeforeRelease';
 
 use Moose::Util::TypeConstraints;
 use MooseX::Types::Moose qw(ArrayRef Bool Str);
-use List::MoreUtils 'uniq';
+use List::MoreUtils qw(uniq none);
 use Module::Runtime 'module_notional_filename';
 use Class::Load 'try_load_class';
 use version;
@@ -53,31 +54,56 @@ has check_all_plugins => (
     default => 0,
 );
 
+has check_all_prereqs => (
+    is => 'ro', isa => Bool,
+    default => 0,
+);
+
 sub before_build
 {
     my $self = shift;
-    $self->check_modules if $self->phase eq 'build';
+
+    if ($self->phase eq 'build')
+    {
+        my @modules = $self->_modules_before_build;
+        $self->_check_modules(@modules) if @modules;
+    }
+}
+
+sub after_build
+{
+    my $self = shift;
+
+    if ($self->phase eq 'build' and $self->check_all_prereqs)
+    {
+        # get what we already prompted about in before_build
+        my @prompted_modules = $self->_modules_before_build;
+
+        # and subtract them off, so we don't prompt for them twice
+        my @modules = grep {
+            my $module = $_;
+            none { $module eq $_ } @prompted_modules;
+        } $self->_modules_prereq;
+        $self->_check_modules(@modules) if @modules;
+    }
 }
 
 sub before_release
 {
     my $self = shift;
-    $self->check_modules if $self->phase eq 'release';
+
+    $self->_check_modules(
+        uniq $self->_modules_before_build, $self->_modules_prereq
+    ) if $self->phase eq 'release';
 }
 
-sub check_modules
+sub _check_modules
 {
-    my $self = shift;
-
-    my @modules = (
-        $self->modules,
-        $self->check_all_plugins
-            ? uniq map { blessed $_ } @{ $self->zilla->plugins }
-            : (),
-    );
+    my ($self, @modules) = @_;
 
     foreach my $module (@modules)
     {
+        next if $module eq 'perl';
         if (not try_load_class($module))
         {
             my $continue = $self->zilla->chrome->prompt_yn(
@@ -126,6 +152,40 @@ sub check_modules
     }
 }
 
+has _modules_before_build => (
+    isa => 'ArrayRef[Str]',
+    traits => ['Array'],
+    handles => { _modules_before_build => 'elements' },
+    lazy => 1,
+    default => sub {
+        my $self = shift;
+        return [
+            uniq $self->modules,
+            $self->check_all_plugins
+                ? map { blessed $_ } @{ $self->zilla->plugins }
+                : (),
+        ];
+    },
+);
+
+has _modules_prereq => (
+    isa => 'ArrayRef[Str]',
+    traits => ['Array'],
+    handles => { _modules_prereq => 'elements' },
+    lazy => 1,
+    default => sub {
+        my $self = shift;
+        my $prereqs = $self->zilla->prereqs->as_string_hash;
+        [
+            map { keys %$_ }
+            grep { defined }
+            map { @{$_}{qw(requires recommends suggests)} }
+            grep { defined }
+            @{$prereqs}{qw(runtime test develop)}
+        ];
+    },
+);
+
 # I bet this is available somewhere as a module?
 sub _indexed_version
 {
@@ -160,7 +220,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.003
+version 0.004
 
 =head1 SYNOPSIS
 
@@ -206,9 +266,16 @@ The name of a module to check for. Can be provided more than once.
 A boolean, defaulting to false, indicating that all plugins being used to
 build this distribution should be checked.
 
+=item * C<check_all_prereqs>
+
+A boolean, defaulting to false, indicating that all prereqs in the
+distribution metadata should be checked. The modules are a merged list taken
+from the C<runtime>, C<test> and C<develop> phases, and the C<runtime>,
+C<recommends> and C<suggests> types.
+
 =back
 
-=for Pod::Coverage mvp_multivalue_args mvp_aliases before_build before_release check_modules
+=for Pod::Coverage mvp_multivalue_args mvp_aliases before_build after_build before_release
 
 =head1 SUPPORT
 
