@@ -15,6 +15,7 @@ t/02-not-installed.t
 t/03-bunk-module.t
 t/04-two-configs.t
 t/05-check-all-prereqs.t
+t/06-duplicates.t
 weaver.ini
 xt/author/pod-spell.t
 xt/release/changes_has_content.t

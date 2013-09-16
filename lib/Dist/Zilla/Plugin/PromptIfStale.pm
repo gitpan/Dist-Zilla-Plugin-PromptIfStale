@@ -5,9 +5,9 @@ BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
 {
-  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.004';
+  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.005';
 }
-# git description: v0.003-10-g35beb1d
+# git description: v0.004-10-gf55d152
 
 # ABSTRACT: Check at build/release time if modules are out of date
 
@@ -18,9 +18,8 @@ with 'Dist::Zilla::Role::BeforeBuild',
 
 use Moose::Util::TypeConstraints;
 use MooseX::Types::Moose qw(ArrayRef Bool Str);
-use List::MoreUtils qw(uniq none);
-use Module::Runtime 'module_notional_filename';
-use Class::Load 'try_load_class';
+use List::MoreUtils 'uniq';
+use Module::Runtime qw(module_notional_filename use_module);
 use version;
 use Path::Tiny;
 use Cwd;
@@ -76,14 +75,7 @@ sub after_build
 
     if ($self->phase eq 'build' and $self->check_all_prereqs)
     {
-        # get what we already prompted about in before_build
-        my @prompted_modules = $self->_modules_before_build;
-
-        # and subtract them off, so we don't prompt for them twice
-        my @modules = grep {
-            my $module = $_;
-            none { $module eq $_ } @prompted_modules;
-        } $self->_modules_prereq;
+        my @modules = $self->_modules_prereq;
         $self->_check_modules(@modules) if @modules;
     }
 }
@@ -97,21 +89,25 @@ sub before_release
     ) if $self->phase eq 'release';
 }
 
+# a package-scoped singleton variable that tracks the module names that have
+# already been checked for, so other instances of this plugin do not duplicate
+# the check.
+my %already_checked;
+
 sub _check_modules
 {
     my ($self, @modules) = @_;
 
-    foreach my $module (@modules)
+    my @prompts;
+    foreach my $module (sort { $a cmp $b } @modules)
     {
         next if $module eq 'perl';
-        if (not try_load_class($module))
-        {
-            my $continue = $self->zilla->chrome->prompt_yn(
-                $module . ' is not installed. Continue anyway?',
-                { default => 0 },
-            );
+        next if $already_checked{$module};
 
-            $self->log_fatal('Aborting build') if not $continue;
+        if (not eval { use_module($module); 1 })
+        {
+            $already_checked{$module}++;
+            push @prompts, $module . ' is not installed.';
             next;
         }
 
@@ -128,28 +124,31 @@ sub _check_modules
 
         if (not defined $indexed_version)
         {
-            my $continue = $self->zilla->chrome->prompt_yn(
-                $module . ' is not indexed. Continue anyway?',
-                { default => 0 },
-            );
-
-            $self->log_fatal('Aborting build') if not $continue;
+            $already_checked{$module}++;
+            push @prompts, $module . ' is not indexed.';
             next;
         }
 
         if (defined $local_version
             and $local_version < $indexed_version)
         {
-            my $continue = $self->zilla->chrome->prompt_yn(
-                'Indexed version of ' . $module . ' is ' . $indexed_version
+            $already_checked{$module}++;
+            push @prompts, 'Indexed version of ' . $module . ' is ' . $indexed_version
                     . ' but you only have ' . $local_version
-                    . ' installed. Continue anyway?',
-                { default => 0 },
-            );
-
-            $self->log_fatal('Aborting build') if not $continue;
+                    . ' installed.';
+            next;
         }
     }
+
+    return if not @prompts;
+
+    my $prompt = @prompts > 1
+        ? (join("\n    ", 'Issues found:', @prompts) . "\n")
+        : ($prompts[0] . ' ');
+    $prompt .= 'Continue anyway?';
+
+    my $continue = $self->zilla->chrome->prompt_yn($prompt, { default => 0 });
+    $self->log_fatal('Aborting build') if not $continue;
 }
 
 has _modules_before_build => (
@@ -159,8 +158,8 @@ has _modules_before_build => (
     lazy => 1,
     default => sub {
         my $self = shift;
-        return [
-            uniq $self->modules,
+        return [ uniq
+            $self->modules,
             $self->check_all_plugins
                 ? map { blessed $_ } @{ $self->zilla->plugins }
                 : (),
@@ -220,7 +219,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 SYNOPSIS
 

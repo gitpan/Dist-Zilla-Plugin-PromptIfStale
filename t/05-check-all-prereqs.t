@@ -9,8 +9,6 @@ use Path::Tiny;
 use Moose::Util 'find_meta';
 use List::Util 'first';
 
-use Dist::Zilla::Plugin::PromptIfStale; # make sure we are loaded!!
-
 my @prompts;
 {
     my $meta = find_meta('Dist::Zilla::Chrome::Test');
@@ -48,16 +46,24 @@ my $tzil = Builder->from_config(
     },
 );
 
-my @expected_prompts = (
-    map { $_ . ' is not installed. Continue anyway?' } 'Bar', map { 'Foo' . $_ } ('0' .. '8'),
+my %expected_prompts = (
+    before_build => [
+        map { '    ' . $_ . ' is not installed.' } 'Bar', map { 'Foo' . $_ } ('0' .. '2') ],
+    after_build => [
+        map { '    ' . $_ . ' is not installed.' } map { 'Foo' . $_ } ('3' .. '8') ],
 );
+
+my @expected_prompts = map {
+    "Issues found:\n" . join("\n", @{$expected_prompts{$_}}, 'Continue anyway?')
+} qw(before_build after_build);
+
 $tzil->chrome->set_response_for($_, 'y') foreach @expected_prompts;
 
 $tzil->build;
 
 cmp_deeply(
     \@prompts,
-    bag(@expected_prompts),
+    \@expected_prompts,
     'we were indeed prompted, for exactly all the right phases and types, and not twice for the duplicates',
 );
 
