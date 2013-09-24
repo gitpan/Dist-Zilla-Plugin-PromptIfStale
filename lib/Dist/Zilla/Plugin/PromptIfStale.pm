@@ -5,9 +5,9 @@ BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
 {
-  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.005';
+  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.006';
 }
-# git description: v0.004-10-gf55d152
+# git description: v0.005-4-gbc878f3
 
 # ABSTRACT: Check at build/release time if modules are out of date
 
@@ -98,6 +98,8 @@ sub _check_modules
 {
     my ($self, @modules) = @_;
 
+    $self->log('checking for stale modules...');
+
     my @prompts;
     foreach my $module (sort { $a cmp $b } @modules)
     {
@@ -148,7 +150,7 @@ sub _check_modules
     $prompt .= 'Continue anyway?';
 
     my $continue = $self->zilla->chrome->prompt_yn($prompt, { default => 0 });
-    $self->log_fatal('Aborting build') if not $continue;
+    $self->log_fatal('Aborting ' . $self->phase) if not $continue;
 }
 
 has _modules_before_build => (
@@ -219,7 +221,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.005
+version 0.006
 
 =head1 SYNOPSIS
 
