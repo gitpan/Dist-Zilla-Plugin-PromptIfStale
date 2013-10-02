@@ -18,6 +18,10 @@ t/03-bunk-module.t
 t/04-two-configs.t
 t/05-check-all-prereqs.t
 t/06-duplicates.t
+t/07-two-stale.t
+t/08-many-modules.t
+t/09-many-modules.t
+t/lib/ManyModules.pm
 weaver.ini
 xt/author/pod-spell.t
 xt/release/changes_has_content.t
@@ -30,7 +34,6 @@ xt/release/minimum-version.t
 xt/release/mojibake.t
 xt/release/no-tabs.t
 xt/release/pod-coverage.t
-xt/release/pod-no404s.t
 xt/release/pod-syntax.t
 xt/release/test-version.t
 xt/release/unused-vars.t

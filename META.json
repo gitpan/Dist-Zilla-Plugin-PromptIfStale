@@ -24,7 +24,7 @@
       "configure" : {
          "requires" : {
             "ExtUtils::MakeMaker" : "6.30",
-            "Module::Build::Tiny" : "0.027"
+            "Module::Build::Tiny" : "0.028"
          }
       },
       "develop" : {
@@ -50,6 +50,7 @@
             "Dist::Zilla::Role::BeforeBuild" : "0",
             "Dist::Zilla::Role::BeforeRelease" : "0",
             "Encode" : "0",
+            "File::Temp" : "0",
             "HTTP::Tiny" : "0",
             "JSON" : "0",
             "List::MoreUtils" : "0",
@@ -57,6 +58,7 @@
             "Moose" : "0",
             "Moose::Util::TypeConstraints" : "0",
             "MooseX::Types::Moose" : "0",
+            "Parse::CPAN::Packages::Fast" : "0",
             "Path::Tiny" : "0",
             "namespace::autoclean" : "0",
             "perl" : "5.010",
@@ -79,14 +81,15 @@
             "Test::Deep" : "0",
             "Test::Fatal" : "0",
             "Test::More" : "0.94",
-            "if" : "0"
+            "if" : "0",
+            "lib" : "0"
          }
       }
    },
    "provides" : {
       "Dist::Zilla::Plugin::PromptIfStale" : {
          "file" : "lib/Dist/Zilla/Plugin/PromptIfStale.pm",
-         "version" : "0.006"
+         "version" : "0.007"
       }
    },
    "release_status" : "stable",
@@ -102,10 +105,10 @@
          "web" : "https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale"
       }
    },
-   "version" : "0.006",
+   "version" : "0.007",
    "x_Dist_Zilla" : {
       "perl" : {
-         "version" : "5.019003"
+         "version" : "5.019004"
       },
       "plugins" : [
          {
@@ -114,11 +117,12 @@
                "Dist::Zilla::Role::Bootstrap" : {
                   "distname" : "Dist-Zilla-Plugin-PromptIfStale",
                   "fallback" : "1",
-                  "try_built" : null
+                  "try_built" : null,
+                  "try_built_method" : "mtime"
                }
             },
             "name" : "Bootstrap::lib",
-            "version" : "0.04000000"
+            "version" : "0.04000001"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::NextVersion",
@@ -199,7 +203,7 @@
          {
             "class" : "Dist::Zilla::Plugin::Test::CheckDeps",
             "name" : "@Author::ETHER/Test::CheckDeps",
-            "version" : "0.008"
+            "version" : "0.009"
          },
          {
             "class" : "Dist::Zilla::Plugin::Test::NoTabs",
@@ -215,7 +219,7 @@
                }
             },
             "name" : "@Author::ETHER/Test::NoTabs",
-            "version" : "0.02"
+            "version" : "0.04"
          },
          {
             "class" : "Dist::Zilla::Plugin::EOLTests",
@@ -268,11 +272,6 @@
             "version" : "2.006001"
          },
          {
-            "class" : "Dist::Zilla::Plugin::Test::Pod::No404s",
-            "name" : "@Author::ETHER/Test::Pod::No404s",
-            "version" : "1.001"
-         },
-         {
             "class" : "Dist::Zilla::Plugin::Test::Kwalitee",
             "name" : "@Author::ETHER/Test::Kwalitee",
             "version" : "2.06"
@@ -309,8 +308,16 @@
          },
          {
             "class" : "Dist::Zilla::Plugin::PodWeaver",
+            "config" : {
+               "Dist::Zilla::Plugin::PodWeaver" : {
+                  "finder" : [
+                     ":InstallModules",
+                     ":ExecFiles"
+                  ]
+               }
+            },
             "name" : "@Author::ETHER/PodWeaver",
-            "version" : "3.101642"
+            "version" : "3.102000"
          },
          {
             "class" : "Dist::Zilla::Plugin::NextRelease",
@@ -320,7 +327,7 @@
          {
             "class" : "Dist::Zilla::Plugin::GithubMeta",
             "name" : "@Author::ETHER/GithubMeta",
-            "version" : "0.38"
+            "version" : "0.42"
          },
          {
             "class" : "Dist::Zilla::Plugin::AutoMetaResources",
@@ -389,7 +396,7 @@
          {
             "class" : "Dist::Zilla::Plugin::MakeMaker::Fallback",
             "name" : "@Author::ETHER/MakeMaker::Fallback",
-            "version" : "0.001"
+            "version" : "0.002"
          },
          {
             "class" : "Dist::Zilla::Plugin::ModuleBuildTiny",
@@ -399,7 +406,7 @@
          {
             "class" : "Dist::Zilla::Plugin::InstallGuide",
             "name" : "@Author::ETHER/InstallGuide",
-            "version" : "1.200000"
+            "version" : "1.200001"
          },
          {
             "class" : "Dist::Zilla::Plugin::CopyFilesFromBuild",
@@ -424,12 +431,12 @@
          {
             "class" : "Dist::Zilla::Plugin::Git::CheckFor::MergeConflicts",
             "name" : "@Author::ETHER/Git::CheckFor::MergeConflicts",
-            "version" : "0.006"
+            "version" : "0.007"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::CheckFor::CorrectBranch",
             "name" : "@Author::ETHER/Git::CheckFor::CorrectBranch",
-            "version" : "0.006"
+            "version" : "0.007"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::Remote::Check",

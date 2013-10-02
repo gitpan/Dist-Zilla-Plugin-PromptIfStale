@@ -5,9 +5,9 @@ BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
 {
-  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.006';
+  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.007';
 }
-# git description: v0.005-4-gbc878f3
+# git description: v0.006-7-gb3f7c5f
 
 # ABSTRACT: Check at build/release time if modules are out of date
 
@@ -100,7 +100,7 @@ sub _check_modules
 
     $self->log('checking for stale modules...');
 
-    my @prompts;
+    my (@bad_modules, @prompts);
     foreach my $module (sort { $a cmp $b } @modules)
     {
         next if $module eq 'perl';
@@ -109,6 +109,7 @@ sub _check_modules
         if (not eval { use_module($module); 1 })
         {
             $already_checked{$module}++;
+            push @bad_modules, $module;
             push @prompts, $module . ' is not installed.';
             next;
         }
@@ -117,7 +118,7 @@ sub _check_modules
         $self->log_debug($module . ' provided locally; skipping version check'), next
             unless path($INC{module_notional_filename($module)})->relative(getcwd) =~ m/^\.\./;
 
-        my $indexed_version = $self->_indexed_version($module);
+        my $indexed_version = $self->_indexed_version($module, !!(@modules > 5));
         my $local_version = version->parse($module->VERSION);
 
         $self->log_debug('comparing indexed vs. local version for ' . $module
@@ -127,6 +128,7 @@ sub _check_modules
         if (not defined $indexed_version)
         {
             $already_checked{$module}++;
+            push @bad_modules, $module;
             push @prompts, $module . ' is not indexed.';
             next;
         }
@@ -135,6 +137,7 @@ sub _check_modules
             and $local_version < $indexed_version)
         {
             $already_checked{$module}++;
+            push @bad_modules, $module;
             push @prompts, 'Indexed version of ' . $module . ' is ' . $indexed_version
                     . ' but you only have ' . $local_version
                     . ' installed.';
@@ -150,7 +153,8 @@ sub _check_modules
     $prompt .= 'Continue anyway?';
 
     my $continue = $self->zilla->chrome->prompt_yn($prompt, { default => 0 });
-    $self->log_fatal('Aborting ' . $self->phase) if not $continue;
+    $self->log_fatal('Aborting ' . $self->phase . "\n"
+        . 'To remedy, do: cpanm ' . join(' ', @bad_modules)) if not $continue;
 }
 
 has _modules_before_build => (
@@ -187,8 +191,18 @@ has _modules_prereq => (
     },
 );
 
-# I bet this is available somewhere as a module?
+my $packages;
 sub _indexed_version
+{
+    my ($self, $module, $combined) = @_;
+
+    return $combined || $packages
+        ? $self->_indexed_version_via_02packages($module)
+        : $self->_indexed_version_via_query($module);
+}
+
+# I bet this is available somewhere as a module?
+sub _indexed_version_via_query
 {
     my ($self, $module) = @_;
 
@@ -203,6 +217,35 @@ sub _indexed_version
     $self->log_debug('invalid payload returned?'), return undef unless $payload;
     $self->log_debug($module . ' not indexed'), return undef if not defined $payload->[0]{mod_vers};
     version->parse($payload->[0]{mod_vers});
+}
+
+# TODO: it would be AWESOME to provide this to multiple plugins via a role
+# even better would be to save the file somewhere semi-permanent and
+# keep it refreshed with a Last-Modified header - or share cpanm's copy?
+sub _get_packages
+{
+    my $self = shift;
+    return $packages if $packages;
+
+    require File::Temp;
+    my $tempdir = File::Temp::tempdir(CLEANUP => 1);
+    my $filename = '02packages.details.txt.gz';
+    my $path = path($tempdir, $filename);
+
+    my $response = HTTP::Tiny->new->mirror('http://www.cpan.org/modules/' . $filename, $path);
+    $self->log_debug('could not fetch the index?'), return undef if not $response->{success};
+
+    require Parse::CPAN::Packages::Fast;
+    $packages = Parse::CPAN::Packages::Fast->new($path->stringify);
+}
+
+sub _indexed_version_via_02packages
+{
+    my ($self, $module) = @_;
+
+    my $package = $self->_get_packages->package($module);
+    return undef if not $package;
+    version->parse($package->version);
 }
 
 __PACKAGE__->meta->make_immutable;
@@ -221,7 +264,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 SYNOPSIS
 

@@ -18,6 +18,7 @@ my @modules = qw(
   ExtUtils::MakeMaker
   File::Spec
   File::Spec::Functions
+  File::Temp
   HTTP::Tiny
   IO::Handle
   IPC::Open3
@@ -30,6 +31,7 @@ my @modules = qw(
   Moose::Util
   Moose::Util::TypeConstraints
   MooseX::Types::Moose
+  Parse::CPAN::Packages::Fast
   Path::Tiny
   Test::CheckDeps
   Test::DZil
@@ -37,6 +39,7 @@ my @modules = qw(
   Test::Fatal
   Test::More
   if
+  lib
   namespace::autoclean
   perl
   strict

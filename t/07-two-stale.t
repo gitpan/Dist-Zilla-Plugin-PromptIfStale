@@ -10,9 +10,11 @@ use Path::Tiny;
 use Moose::Util 'find_meta';
 use version;
 
-# simulate a response from the PAUSE index, without having to do a real HTTP hit
-
-use Dist::Zilla::Plugin::PromptIfStale; # make sure we are loaded!!
+BEGIN {
+    use Dist::Zilla::Plugin::PromptIfStale;
+    $Dist::Zilla::Plugin::PromptIfStale::VERSION = 9999
+        unless $Dist::Zilla::Plugin::PromptIfStale::VERSION;
+}
 
 {
     my $meta = find_meta('Dist::Zilla::Plugin::PromptIfStale');
@@ -23,6 +25,7 @@ use Dist::Zilla::Plugin::PromptIfStale; # make sure we are loaded!!
         my ($module) = @_;
 
         return version->parse('200.0') if $module eq 'Indexed::But::Not::Installed';
+        return undef if $module eq 'Unindexed';
         die 'should not be checking for ' . $module;
     });
 }
@@ -37,21 +40,32 @@ my @prompts;
     });
 }
 
+{
+    package Unindexed;
+    our $VERSION = '2.0';
+    $INC{'Unindexed.pm'} = '/tmp/bogusfile';    # cannot be in our local dir or we will abort
+}
+
 my $tzil = Builder->from_config(
     { dist_root => 't/does-not-exist' },
     {
         add_files => {
             'source/dist.ini' => simple_ini(
                 [ GatherDir => ],
-                [ 'PromptIfStale' => { modules => [ 'Indexed::But::Not::Installed' ], phase => 'build' } ],
+                [ 'PromptIfStale' => { modules => [ 'Indexed::But::Not::Installed', 'Unindexed' ], phase => 'build' } ],
             ),
             path(qw(source lib Foo.pm)) => "package Foo;\n1;\n",
         },
     },
 );
 
-my $prompt = 'Indexed::But::Not::Installed is not installed. Continue anyway?';
-$tzil->chrome->set_response_for($prompt, 'n');
+# no need to test all combinations - we sort the module list
+
+my $full_prompt = "Issues found:
+    Indexed::But::Not::Installed is not installed.
+    Unindexed is not indexed.
+Continue anyway?";
+$tzil->chrome->set_response_for($full_prompt, 'n');
 
 like(
     exception { $tzil->build },
@@ -61,13 +75,13 @@ like(
 
 cmp_deeply(
     \@prompts,
-    [ $prompt ],
+    [ $full_prompt ],
     'we were indeed prompted',
 );
 
 cmp_deeply(
     $tzil->log_messages,
-    supersetof("[PromptIfStale] Aborting build\n[PromptIfStale] To remedy, do: cpanm Indexed::But::Not::Installed"),
+    supersetof("[PromptIfStale] Aborting build\n[PromptIfStale] To remedy, do: cpanm Indexed::But::Not::Installed Unindexed"),
     'build was aborted, with remedy instructions',
 ) or diag 'got: ', explain $tzil->log_messages;
 
