@@ -8,7 +8,7 @@ use Test::CheckDeps 0.007;
 
 check_dependencies('suggests');
 
-if (1) {
+if (0) {
     BAIL_OUT("Missing dependencies") if !Test::More->builder->is_passing;
 }
 

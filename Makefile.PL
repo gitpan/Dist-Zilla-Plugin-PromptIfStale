@@ -46,7 +46,7 @@ my %WriteMakefileArgs = (
   "BUILD_REQUIRES" => {},
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => "6.30",
-    "Module::Build::Tiny" => "0.028"
+    "Module::Build::Tiny" => "0.029"
   },
   "DISTNAME" => "Dist-Zilla-Plugin-PromptIfStale",
   "EXE_FILES" => [],
@@ -89,7 +89,7 @@ my %WriteMakefileArgs = (
     "if" => 0,
     "lib" => 0
   },
-  "VERSION" => "0.007",
+  "VERSION" => "0.008",
   "test" => {
     "TESTS" => "t/*.t"
   }

@@ -5,9 +5,9 @@ BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
 {
-  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.007';
+  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.008';
 }
-# git description: v0.006-7-gb3f7c5f
+# git description: v0.007-3-gb4bcd48
 
 # ABSTRACT: Check at build/release time if modules are out of date
 
@@ -186,7 +186,7 @@ has _modules_prereq => (
             grep { defined }
             map { @{$_}{qw(requires recommends suggests)} }
             grep { defined }
-            @{$prereqs}{qw(runtime test develop)}
+            @{$prereqs}{qw(configure build runtime test develop)}
         ];
     },
 );
@@ -264,7 +264,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 SYNOPSIS
 
@@ -312,10 +312,10 @@ build this distribution should be checked.
 
 =item * C<check_all_prereqs>
 
-A boolean, defaulting to false, indicating that all prereqs in the
+A boolean, defaulting to false, indicating that all prerequisites in the
 distribution metadata should be checked. The modules are a merged list taken
-from the C<runtime>, C<test> and C<develop> phases, and the C<runtime>,
-C<recommends> and C<suggests> types.
+from the C<configure>, C<build>, C<runtime>, C<test> and C<develop> phases,
+and the C<requires>, C<recommends> and C<suggests> types.
 
 =back
 
