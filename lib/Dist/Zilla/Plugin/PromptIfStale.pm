@@ -1,14 +1,14 @@
 use strict;
 use warnings;
 package Dist::Zilla::Plugin::PromptIfStale;
+{
+  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.009';
+}
+# git description: v0.008-5-g525c297
+
 BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
-{
-  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.008';
-}
-# git description: v0.007-3-gb4bcd48
-
 # ABSTRACT: Check at build/release time if modules are out of date
 
 use Moose;
@@ -254,7 +254,7 @@ __END__
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =for :stopwords Karen Etheridge irc
 
@@ -264,7 +264,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.008
+version 0.009
 
 =head1 SYNOPSIS
 

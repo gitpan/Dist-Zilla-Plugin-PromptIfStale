@@ -7,6 +7,7 @@ use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::DZil;
 use Test::Fatal;
 use Test::Deep;
+use File::Spec;
 use Path::Tiny;
 use Moose::Util 'find_meta';
 
@@ -53,11 +54,11 @@ sub do_tests
         });
     }
 
+    foreach my $module (map { 'Unindexed' . $_ } (0..6))
     {
-        package Unindexed;
-        our $VERSION = '2.0';
-        @INC{ ( map { 'Unindexed' . $_ . '.pm' } (0..6) ) } =
-           ( qw(/tmp/bogusfile) x 7 );    # cannot be in our local dir or we will abort
+        $INC{$module . '.pm'} = File::Spec->devnull;   # cannot be in our build dir!
+        no strict 'refs';
+        ${$module . '::VERSION'} = '2.0';
     }
 
     my $tzil = Builder->from_config(
