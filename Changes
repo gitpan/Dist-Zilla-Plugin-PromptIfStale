@@ -1,5 +1,8 @@
 Revision history for Dist-Zilla-Plugin-PromptIfStale
 
+0.010     2013-11-03 20:22:01Z (TRIAL RELEASE)
+          - more diagnostics printed in failing tests
+
 0.009     2013-11-02 21:15:16Z
           - work around issues with EUMM-bundled version.pm by properly
             fudging a VERSION during testing (affected perls before 5.13.9)

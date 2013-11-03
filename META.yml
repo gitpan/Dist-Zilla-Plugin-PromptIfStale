@@ -32,7 +32,7 @@ no_index:
 provides:
   Dist::Zilla::Plugin::PromptIfStale:
     file: lib/Dist/Zilla/Plugin/PromptIfStale.pm
-    version: 0.009
+    version: 0.010
 requires:
   Cwd: 0
   Dist::Zilla::Role::AfterBuild: 0
@@ -58,7 +58,7 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-Plugin-PromptIfStale
   homepage: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale
   repository: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale.git
-version: 0.009
+version: 0.010
 x_Dist_Zilla:
   perl:
     version: 5.019005
@@ -420,6 +420,6 @@ x_Dist_Zilla:
   zilla:
     class: Dist::Zilla::Dist::Builder
     config:
-      is_trial: 0
+      is_trial: 1
     version: 5.005
 x_authority: cpan:ETHER

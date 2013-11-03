@@ -98,10 +98,10 @@
    "provides" : {
       "Dist::Zilla::Plugin::PromptIfStale" : {
          "file" : "lib/Dist/Zilla/Plugin/PromptIfStale.pm",
-         "version" : "0.009"
+         "version" : "0.010"
       }
    },
-   "release_status" : "stable",
+   "release_status" : "testing",
    "resources" : {
       "bugtracker" : {
          "mailto" : "bug-Dist-Zilla-Plugin-PromptIfStale@rt.cpan.org",
@@ -114,7 +114,7 @@
          "web" : "https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale"
       }
    },
-   "version" : "0.009",
+   "version" : "0.010",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.019005"
@@ -577,7 +577,7 @@
       "zilla" : {
          "class" : "Dist::Zilla::Dist::Builder",
          "config" : {
-            "is_trial" : "0"
+            "is_trial" : "1"
          },
          "version" : "5.005"
       }
