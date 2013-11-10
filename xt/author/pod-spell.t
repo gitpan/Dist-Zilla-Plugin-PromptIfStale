@@ -13,6 +13,9 @@ __DATA__
 Karen
 Etheridge
 ether
+David
+Golden
+dagolden
 lib
 Dist
 Zilla

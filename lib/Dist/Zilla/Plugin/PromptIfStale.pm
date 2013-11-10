@@ -2,9 +2,9 @@ use strict;
 use warnings;
 package Dist::Zilla::Plugin::PromptIfStale;
 {
-  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.010'; # TRIAL
+  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.011';
 }
-# git description: v0.009-1-ge7159f9
+# git description: v0.010-TRIAL-8-gb46f09b
 
 BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
@@ -83,16 +83,21 @@ sub after_build
 sub before_release
 {
     my $self = shift;
-
-    $self->_check_modules(
-        uniq $self->_modules_before_build, $self->_modules_prereq
-    ) if $self->phase eq 'release';
+    if ($self->phase eq 'release')
+    {
+        my @modules = $self->_modules_before_build;
+        push @modules, $self->_modules_prereq
+            if $self->check_all_prereqs;
+        $self->_check_modules( uniq @modules ) if @modules;
+    }
 }
 
 # a package-scoped singleton variable that tracks the module names that have
 # already been checked for, so other instances of this plugin do not duplicate
 # the check.
 my %already_checked;
+
+sub __clear_already_checked{ %already_checked = () } # for testing
 
 sub _check_modules
 {
@@ -256,7 +261,7 @@ __END__
 
 =encoding UTF-8
 
-=for :stopwords Karen Etheridge irc
+=for :stopwords Karen Etheridge David Golden irc
 
 =head1 NAME
 
@@ -264,7 +269,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.010
+version 0.011
 
 =head1 SYNOPSIS
 
@@ -347,5 +352,9 @@ This software is copyright (c) 2013 by Karen Etheridge.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
+
+=head1 CONTRIBUTOR
+
+David Golden <dagolden@cpan.org>
 
 =cut

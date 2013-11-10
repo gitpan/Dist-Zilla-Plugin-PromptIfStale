@@ -21,6 +21,7 @@ t/06-duplicates.t
 t/07-two-stale.t
 t/08-many-modules.t
 t/09-many-modules.t
+t/10-release-prompt.t
 t/lib/ManyModules.pm
 weaver.ini
 xt/author/00-compile.t
