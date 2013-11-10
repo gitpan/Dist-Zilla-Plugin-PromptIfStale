@@ -66,7 +66,8 @@
             "HTTP::Tiny" : "0",
             "JSON" : "0",
             "List::MoreUtils" : "0",
-            "Module::Runtime" : "0",
+            "Module::Metadata" : "0",
+            "Module::Path" : "0",
             "Moose" : "0",
             "Moose::Util::TypeConstraints" : "0",
             "MooseX::Types::Moose" : "0",
@@ -94,18 +95,17 @@
             "Test::Deep" : "0",
             "Test::Fatal" : "0",
             "Test::More" : "0",
-            "if" : "0",
-            "lib" : "0"
+            "if" : "0"
          }
       }
    },
    "provides" : {
       "Dist::Zilla::Plugin::PromptIfStale" : {
          "file" : "lib/Dist/Zilla/Plugin/PromptIfStale.pm",
-         "version" : "0.011"
+         "version" : "0.012"
       }
    },
-   "release_status" : "stable",
+   "release_status" : "testing",
    "resources" : {
       "bugtracker" : {
          "mailto" : "bug-Dist-Zilla-Plugin-PromptIfStale@rt.cpan.org",
@@ -118,7 +118,7 @@
          "web" : "https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale"
       }
    },
-   "version" : "0.011",
+   "version" : "0.012",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.019005"
@@ -591,7 +591,7 @@
       "zilla" : {
          "class" : "Dist::Zilla::Dist::Builder",
          "config" : {
-            "is_trial" : "0"
+            "is_trial" : "1"
          },
          "version" : "5.006"
       }

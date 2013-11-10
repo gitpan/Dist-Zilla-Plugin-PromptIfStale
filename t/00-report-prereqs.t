@@ -28,7 +28,8 @@ my @modules = qw(
   List::MoreUtils
   List::Util
   Module::Build::Tiny
-  Module::Runtime
+  Module::Metadata
+  Module::Path
   Moose
   Moose::Util
   Moose::Util::TypeConstraints
@@ -40,7 +41,6 @@ my @modules = qw(
   Test::Fatal
   Test::More
   if
-  lib
   namespace::autoclean
   perl
   strict

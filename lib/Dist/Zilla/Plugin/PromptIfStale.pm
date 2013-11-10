@@ -2,9 +2,9 @@ use strict;
 use warnings;
 package Dist::Zilla::Plugin::PromptIfStale;
 {
-  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.011';
+  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.012'; # TRIAL
 }
-# git description: v0.010-TRIAL-8-gb46f09b
+# git description: v0.011-5-gb8cd67b
 
 BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
@@ -19,13 +19,14 @@ with 'Dist::Zilla::Role::BeforeBuild',
 use Moose::Util::TypeConstraints;
 use MooseX::Types::Moose qw(ArrayRef Bool Str);
 use List::MoreUtils 'uniq';
-use Module::Runtime qw(module_notional_filename use_module);
 use version;
 use Path::Tiny;
 use Cwd;
 use HTTP::Tiny;
 use Encode;
 use JSON;
+use Module::Path 'module_path';
+use Module::Metadata;
 use namespace::autoclean;
 
 sub mvp_multivalue_args { 'modules' }
@@ -105,13 +106,14 @@ sub _check_modules
 
     $self->log('checking for stale modules...');
 
-    my (@bad_modules, @prompts);
+    my (@bad_modules, @prompts, %query_index);
     foreach my $module (sort { $a cmp $b } @modules)
     {
         next if $module eq 'perl';
         next if $already_checked{$module};
 
-        if (not eval { use_module($module); 1 })
+        my $path = module_path($module);
+        if (not $path)
         {
             $already_checked{$module}++;
             push @bad_modules, $module;
@@ -120,11 +122,18 @@ sub _check_modules
         }
 
         # ignore modules in the dist currently being built
-        $self->log_debug($module . ' provided locally; skipping version check'), next
-            unless path($INC{module_notional_filename($module)})->relative(getcwd) =~ m/^\.\./;
+        my $relative_path = path($path)->relative(getcwd);
+        $self->log_debug($module . ' provided locally (at ' . $relative_path
+                . '); skipping version check'), next
+            unless $relative_path =~ m/^\.\./;
 
-        my $indexed_version = $self->_indexed_version($module, !!(@modules > 5));
-        my $local_version = version->parse($module->VERSION);
+        $query_index{$module} = $path;
+    }
+
+    foreach my $module (sort { $a cmp $b } keys %query_index)
+    {
+        my $indexed_version = $self->_indexed_version($module, !!(keys %query_index > 5));
+        my $local_version = Module::Metadata->new_from_file($query_index{$module})->version;
 
         $self->log_debug('comparing indexed vs. local version for ' . $module
             . ': indexed=' . ($indexed_version // 'undef')
@@ -269,7 +278,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.011
+version 0.012
 
 =head1 SYNOPSIS
 

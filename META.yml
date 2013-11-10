@@ -13,7 +13,6 @@ build_requires:
   Test::Fatal: 0
   Test::More: 0
   if: 0
-  lib: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.30
   Module::Build::Tiny: 0.030
@@ -32,7 +31,7 @@ no_index:
 provides:
   Dist::Zilla::Plugin::PromptIfStale:
     file: lib/Dist/Zilla/Plugin/PromptIfStale.pm
-    version: 0.011
+    version: 0.012
 requires:
   Cwd: 0
   Dist::Zilla::Role::AfterBuild: 0
@@ -43,7 +42,8 @@ requires:
   HTTP::Tiny: 0
   JSON: 0
   List::MoreUtils: 0
-  Module::Runtime: 0
+  Module::Metadata: 0
+  Module::Path: 0
   Moose: 0
   Moose::Util::TypeConstraints: 0
   MooseX::Types::Moose: 0
@@ -58,7 +58,7 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-Plugin-PromptIfStale
   homepage: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale
   repository: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale.git
-version: 0.011
+version: 0.012
 x_Dist_Zilla:
   perl:
     version: 5.019005
@@ -428,7 +428,7 @@ x_Dist_Zilla:
   zilla:
     class: Dist::Zilla::Dist::Builder
     config:
-      is_trial: 0
+      is_trial: 1
     version: 5.006
 x_authority: cpan:ETHER
 x_contributors:
