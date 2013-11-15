@@ -4,24 +4,25 @@ use warnings FATAL => 'all';
 use Test::More;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::DZil;
+use Test::Fatal;
 use Test::Deep;
 use Path::Tiny;
 use Moose::Util 'find_meta';
 use List::Util 'first';
 
+my @prompts;
+{
+    my $meta = find_meta('Dist::Zilla::Chrome::Test');
+    $meta->make_mutable;
+    $meta->add_before_method_modifier(prompt_str => sub {
+        my ($self, $prompt, $arg) = @_;
+        push @prompts, $prompt;
+    });
+}
+
 for my $case ( 0, 1 ) {
 
     subtest "check_all_prereqs => $case" => sub {
-
-        my @prompts;
-        {
-            my $meta = find_meta('Dist::Zilla::Chrome::Test');
-            $meta->make_mutable;
-            $meta->add_before_method_modifier(prompt_str => sub {
-                my ($self, $prompt, $arg) = @_;
-                push @prompts, $prompt;
-            });
-        }
 
         my $tzil = Builder->from_config(
             { dist_root => 't/does-not-exist' },
@@ -65,17 +66,22 @@ for my $case ( 0, 1 ) {
             "Issues found:\n" . join("\n", @{$expected_prompts{$_}}, 'Continue anyway?')
         } qw(before_release);
 
-        $tzil->chrome->set_response_for($_, 'y') foreach @expected_prompts;
+        $tzil->chrome->logger->set_debug(1);
 
-        eval { $tzil->release }; # because aborting is log_fatal
+        like(
+            exception { $tzil->release },
+            qr/\Q[PromptIfStale] Aborting release\E/,
+            'release aborted',
+        );
 
         cmp_deeply(
             \@prompts,
             \@expected_prompts,
-            'we were indeed prompted, for exactly all the right phases and types, and not twice for the duplicates',
-        );
+            "check_all_prereqs = $case: we were indeed prompted, for exactly all the right phases and types, and not twice for the duplicates",
+        ) or diag 'got: ', explain \@prompts;
 
         Dist::Zilla::Plugin::PromptIfStale::__clear_already_checked();
+        @prompts = ();
     }
 }
 

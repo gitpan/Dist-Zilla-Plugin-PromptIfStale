@@ -29,7 +29,7 @@
       },
       "develop" : {
          "recommends" : {
-            "Dist::Zilla::PluginBundle::Author::ETHER" : "0.038"
+            "Dist::Zilla::PluginBundle::Author::ETHER" : "0.040"
          },
          "requires" : {
             "Dist::Zilla" : "5.006",
@@ -102,10 +102,10 @@
    "provides" : {
       "Dist::Zilla::Plugin::PromptIfStale" : {
          "file" : "lib/Dist/Zilla/Plugin/PromptIfStale.pm",
-         "version" : "0.012"
+         "version" : "0.013"
       }
    },
-   "release_status" : "testing",
+   "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
          "mailto" : "bug-Dist-Zilla-Plugin-PromptIfStale@rt.cpan.org",
@@ -118,7 +118,7 @@
          "web" : "https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale"
       }
    },
-   "version" : "0.012",
+   "version" : "0.013",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.019005"
@@ -345,11 +345,113 @@
                   "finder" : [
                      ":InstallModules",
                      ":ExecFiles"
+                  ],
+                  "plugins" : [
+                     {
+                        "class" : "Pod::Weaver::Plugin::EnsurePod5",
+                        "name" : "@CorePrep/EnsurePod5",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Plugin::H1Nester",
+                        "name" : "@CorePrep/H1Nester",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Plugin::SingleEncoding",
+                        "name" : "@Default/SingleEncoding",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Name",
+                        "name" : "@Default/Name",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Version",
+                        "name" : "@Default/Version",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Region",
+                        "name" : "@Default/prelude",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Generic",
+                        "name" : "SYNOPSIS",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Generic",
+                        "name" : "DESCRIPTION",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Generic",
+                        "name" : "OVERVIEW",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Collect",
+                        "name" : "ATTRIBUTES",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Collect",
+                        "name" : "METHODS",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Collect",
+                        "name" : "FUNCTIONS",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Leftovers",
+                        "name" : "@Default/Leftovers",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Region",
+                        "name" : "@Default/postlude",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Authors",
+                        "name" : "@Default/Authors",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Legal",
+                        "name" : "@Default/Legal",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Plugin::Transformer",
+                        "name" : "-Transformer",
+                        "version" : "4.004"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Plugin::StopWords",
+                        "name" : "-StopWords",
+                        "version" : "1.008"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Plugin::Encoding",
+                        "name" : "-Encoding",
+                        "version" : "0.02"
+                     },
+                     {
+                        "class" : "Pod::Weaver::Section::Contributors",
+                        "name" : "Contributors",
+                        "version" : "0.006"
+                     }
                   ]
                }
             },
             "name" : "@Author::ETHER/PodWeaver",
-            "version" : "4.001"
+            "version" : "4.002"
          },
          {
             "class" : "Dist::Zilla::Plugin::NextRelease",
@@ -359,7 +461,7 @@
          {
             "class" : "Dist::Zilla::Plugin::ReadmeAnyFromPod",
             "name" : "@Author::ETHER/ReadmeAnyFromPod",
-            "version" : "0.133030"
+            "version" : "0.133060"
          },
          {
             "class" : "Dist::Zilla::Plugin::GithubMeta",
@@ -472,9 +574,14 @@
             "version" : "2.017"
          },
          {
+            "class" : "Dist::Zilla::Plugin::Git::CheckFor::MergeConflicts",
+            "name" : "@Author::ETHER/Git::CheckFor::MergeConflicts",
+            "version" : "0.008"
+         },
+         {
             "class" : "Dist::Zilla::Plugin::Git::CheckFor::CorrectBranch",
             "name" : "@Author::ETHER/Git::CheckFor::CorrectBranch",
-            "version" : "0.007"
+            "version" : "0.008"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::Remote::Check",
@@ -591,7 +698,7 @@
       "zilla" : {
          "class" : "Dist::Zilla::Dist::Builder",
          "config" : {
-            "is_trial" : "1"
+            "is_trial" : "0"
          },
          "version" : "5.006"
       }

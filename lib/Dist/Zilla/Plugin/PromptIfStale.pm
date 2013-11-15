@@ -2,9 +2,9 @@ use strict;
 use warnings;
 package Dist::Zilla::Plugin::PromptIfStale;
 {
-  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.012'; # TRIAL
+  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.013';
 }
-# git description: v0.011-5-gb8cd67b
+# git description: v0.012-TRIAL-4-ga5088ea
 
 BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
@@ -278,7 +278,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.012
+version 0.013
 
 =head1 SYNOPSIS
 
