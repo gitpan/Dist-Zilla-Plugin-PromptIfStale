@@ -29,7 +29,7 @@
       },
       "develop" : {
          "recommends" : {
-            "Dist::Zilla::PluginBundle::Author::ETHER" : "0.040"
+            "Dist::Zilla::PluginBundle::Author::ETHER" : "0.041"
          },
          "requires" : {
             "Dist::Zilla" : "5.006",
@@ -38,6 +38,7 @@
             "Dist::Zilla::Plugin::GitHub::Update" : "0",
             "Dist::Zilla::Plugin::GithubMeta" : "0",
             "Dist::Zilla::Plugin::MakeMaker::Fallback" : "0",
+            "Dist::Zilla::Plugin::MetaResources" : "0",
             "Dist::Zilla::Plugin::ModuleBuildTiny" : "0.004",
             "Dist::Zilla::Plugin::PromptIfStale" : "0",
             "Dist::Zilla::PluginBundle::Author::ETHER" : "0.024",
@@ -102,7 +103,7 @@
    "provides" : {
       "Dist::Zilla::Plugin::PromptIfStale" : {
          "file" : "lib/Dist/Zilla/Plugin/PromptIfStale.pm",
-         "version" : "0.013"
+         "version" : "0.014"
       }
    },
    "release_status" : "stable",
@@ -116,12 +117,14 @@
          "type" : "git",
          "url" : "https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale.git",
          "web" : "https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale"
-      }
+      },
+      "x_IRC" : "irc://irc.perl.org/#distzilla",
+      "x_MailingList" : "http://dzil.org/#mailing-list"
    },
-   "version" : "0.013",
+   "version" : "0.014",
    "x_Dist_Zilla" : {
       "perl" : {
-         "version" : "5.019005"
+         "version" : "5.019006"
       },
       "plugins" : [
          {
@@ -135,7 +138,7 @@
                }
             },
             "name" : "Bootstrap::lib",
-            "version" : "0.04000001"
+            "version" : "0.04000002"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::NextVersion",
@@ -144,11 +147,38 @@
          },
          {
             "class" : "Dist::Zilla::Plugin::PromptIfStale",
+            "config" : {
+               "Dist::Zilla::Plugin::PromptIfStale" : {
+                  "check_all_plugins" : 0,
+                  "check_all_prereqs" : 0,
+                  "modules" : [
+                     "Dist::Zilla::PluginBundle::Author::ETHER"
+                  ],
+                  "phase" : "build",
+                  "skip" : []
+               }
+            },
             "name" : "@Author::ETHER/build",
             "version" : null
          },
          {
             "class" : "Dist::Zilla::Plugin::PromptIfStale",
+            "config" : {
+               "Dist::Zilla::Plugin::PromptIfStale" : {
+                  "check_all_plugins" : "1",
+                  "check_all_prereqs" : "1",
+                  "modules" : [],
+                  "phase" : "release",
+                  "skip" : [
+                     "Dist::Zilla::Plugin::Git::Check",
+                     "Dist::Zilla::Plugin::Git::Commit",
+                     "Dist::Zilla::Plugin::Git::GatherDir",
+                     "Dist::Zilla::Plugin::Git::NextVersion",
+                     "Dist::Zilla::Plugin::Git::Push",
+                     "Dist::Zilla::Plugin::Git::Tag"
+                  ]
+               }
+            },
             "name" : "@Author::ETHER/release",
             "version" : null
          },
@@ -314,6 +344,11 @@
             "version" : "0.010"
          },
          {
+            "class" : "Dist::Zilla::Plugin::Test::Portability",
+            "name" : "@Author::ETHER/Test::Portability",
+            "version" : "2.000005"
+         },
+         {
             "class" : "Dist::Zilla::Plugin::PruneCruft",
             "name" : "@Author::ETHER/PruneCruft",
             "version" : "5.006"
@@ -461,7 +496,7 @@
          {
             "class" : "Dist::Zilla::Plugin::ReadmeAnyFromPod",
             "name" : "@Author::ETHER/ReadmeAnyFromPod",
-            "version" : "0.133060"
+            "version" : "0.133290"
          },
          {
             "class" : "Dist::Zilla::Plugin::GithubMeta",
@@ -494,7 +529,7 @@
                }
             },
             "name" : "@Author::ETHER/MetaProvides::Package",
-            "version" : "1.15000000"
+            "version" : "1.15000001"
          },
          {
             "class" : "Dist::Zilla::Plugin::MetaConfig",
@@ -541,12 +576,12 @@
          {
             "class" : "Dist::Zilla::Plugin::RunExtraTests",
             "name" : "@Author::ETHER/RunExtraTests",
-            "version" : "0.015"
+            "version" : "0.016"
          },
          {
             "class" : "Dist::Zilla::Plugin::MakeMaker::Fallback",
             "name" : "@Author::ETHER/MakeMaker::Fallback",
-            "version" : "0.003"
+            "version" : "0.004"
          },
          {
             "class" : "Dist::Zilla::Plugin::ModuleBuildTiny",
@@ -556,7 +591,7 @@
          {
             "class" : "Dist::Zilla::Plugin::InstallGuide",
             "name" : "@Author::ETHER/InstallGuide",
-            "version" : "1.200001"
+            "version" : "1.200002"
          },
          {
             "class" : "Dist::Zilla::Plugin::CheckSelfDependency",
@@ -656,6 +691,22 @@
          },
          {
             "class" : "Dist::Zilla::Plugin::PromptIfStale",
+            "config" : {
+               "Dist::Zilla::Plugin::PromptIfStale" : {
+                  "check_all_plugins" : "1",
+                  "check_all_prereqs" : "1",
+                  "modules" : [],
+                  "phase" : "build",
+                  "skip" : [
+                     "Dist::Zilla::Plugin::Git::Check",
+                     "Dist::Zilla::Plugin::Git::Commit",
+                     "Dist::Zilla::Plugin::Git::GatherDir",
+                     "Dist::Zilla::Plugin::Git::NextVersion",
+                     "Dist::Zilla::Plugin::Git::Push",
+                     "Dist::Zilla::Plugin::Git::Tag"
+                  ]
+               }
+            },
             "name" : "PromptIfStale",
             "version" : null
          },
@@ -663,6 +714,11 @@
             "class" : "Dist::Zilla::Plugin::ContributorsFromGit",
             "name" : "ContributorsFromGit",
             "version" : "0.006"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::MetaResources",
+            "name" : "additional",
+            "version" : "5.006"
          },
          {
             "class" : "Dist::Zilla::Plugin::FinderCode",

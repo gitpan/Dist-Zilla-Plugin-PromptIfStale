@@ -22,6 +22,7 @@ t/07-two-stale.t
 t/08-many-modules.t
 t/10-release-prompt.t
 t/11-local-module.t
+t/12-skip.t
 t/lib/Unindexed.pm
 t/lib/Unindexed0.pm
 t/lib/Unindexed1.pm
@@ -45,5 +46,6 @@ xt/release/no-tabs.t
 xt/release/pod-coverage.t
 xt/release/pod-no404s.t
 xt/release/pod-syntax.t
+xt/release/portability.t
 xt/release/test-version.t
 xt/release/unused-vars.t
