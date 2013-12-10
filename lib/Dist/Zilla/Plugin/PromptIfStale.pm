@@ -2,9 +2,9 @@ use strict;
 use warnings;
 package Dist::Zilla::Plugin::PromptIfStale;
 {
-  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.014';
+  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.015';
 }
-# git description: v0.013-5-g72f2ebb
+# git description: v0.014-9-gc5ecc1b
 
 BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
@@ -67,6 +67,15 @@ has skip => (
     default => sub { [] },
 );
 
+has fatal => (
+    is => 'ro', isa => Bool,
+    default => 0,
+);
+
+has index_base_url => (
+    is => 'ro', isa => Str,
+);
+
 around dump_config => sub
 {
     my ($orig, $self) = @_;
@@ -127,7 +136,7 @@ sub _check_modules
 
     $self->log('checking for stale modules...');
 
-    my (@bad_modules, @prompts, %query_index);
+    my (@bad_modules, @prompts, %module_to_filename);
     foreach my $module (sort { $a cmp $b } @modules)
     {
         next if $module eq 'perl';
@@ -148,13 +157,13 @@ sub _check_modules
                 . '); skipping version check'), next
             unless $relative_path =~ m/^\.\./;
 
-        $query_index{$module} = $path;
+        $module_to_filename{$module} = $path;
     }
 
-    foreach my $module (sort { $a cmp $b } keys %query_index)
+    foreach my $module (sort { $a cmp $b } keys %module_to_filename)
     {
-        my $indexed_version = $self->_indexed_version($module, !!(keys %query_index > 5));
-        my $local_version = Module::Metadata->new_from_file($query_index{$module})->version;
+        my $indexed_version = $self->_indexed_version($module, !!(keys %module_to_filename > 5));
+        my $local_version = Module::Metadata->new_from_file($module_to_filename{$module})->version;
 
         $self->log_debug('comparing indexed vs. local version for ' . $module
             . ': indexed=' . ($indexed_version // 'undef')
@@ -185,9 +194,14 @@ sub _check_modules
     my $prompt = @prompts > 1
         ? (join("\n    ", 'Issues found:', @prompts) . "\n")
         : ($prompts[0] . ' ');
-    $prompt .= 'Continue anyway?';
 
-    my $continue = $self->zilla->chrome->prompt_yn($prompt, { default => 0 });
+    my $continue;
+    if (not $self->fatal)
+    {
+        $prompt .= 'Continue anyway?';
+        $continue = $self->zilla->chrome->prompt_yn($prompt, { default => 0 });
+    }
+
     $self->log_fatal('Aborting ' . $self->phase . "\n"
         . 'To remedy, do: cpanm ' . join(' ', @bad_modules)) if not $continue;
 }
@@ -226,7 +240,7 @@ has _modules_prereq => (
             grep { defined }
             map { @{$_}{qw(requires recommends suggests)} }
             grep { defined }
-            @{$prereqs}{qw(configure build runtime test develop)}
+            values %$prereqs
         ];
     },
 );
@@ -236,7 +250,10 @@ sub _indexed_version
 {
     my ($self, $module, $combined) = @_;
 
-    return $combined || $packages
+    # we download 02packages if we have several modules to query at once, or
+    # if we were given a different URL to use -- otherwise, we perform an API
+    # hit for just this one module's data
+    return $combined || $packages || $self->index_base_url
         ? $self->_indexed_version_via_02packages($module)
         : $self->_indexed_version_via_query($module);
 }
@@ -245,6 +262,8 @@ sub _indexed_version
 sub _indexed_version_via_query
 {
     my ($self, $module) = @_;
+
+    die 'should not be here - get 02packages instead' if $self->index_base_url;
 
     my $res = HTTP::Tiny->new->get("http://cpanidx.org/cpanidx/json/mod/$module");
     $self->log_debug('could not query the index?'), return undef if not $res->{success};
@@ -272,7 +291,9 @@ sub _get_packages
     my $filename = '02packages.details.txt.gz';
     my $path = path($tempdir, $filename);
 
-    my $response = HTTP::Tiny->new->mirror('http://www.cpan.org/modules/' . $filename, $path);
+    my $base = $self->index_base_url || 'http://www.cpan.org';
+
+    my $response = HTTP::Tiny->new->mirror($base . '/modules/' . $filename, $path);
     $self->log_debug('could not fetch the index?'), return undef if not $response->{success};
 
     require Parse::CPAN::Packages::Fast;
@@ -296,7 +317,7 @@ __END__
 
 =encoding UTF-8
 
-=for :stopwords Karen Etheridge David Golden irc
+=for :stopwords Karen Etheridge David Golden darkpan irc
 
 =head1 NAME
 
@@ -304,7 +325,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.014
+version 0.015
 
 =head1 SYNOPSIS
 
@@ -354,12 +375,23 @@ build this distribution should be checked.
 
 A boolean, defaulting to false, indicating that all prerequisites in the
 distribution metadata should be checked. The modules are a merged list taken
-from the C<configure>, C<build>, C<runtime>, C<test> and C<develop> phases,
+from all phases (C<configure>, C<build>, C<runtime>, C<test> and C<develop>) ,
 and the C<requires>, C<recommends> and C<suggests> types.
 
 =item * C<skip>
 
 The name of a module to exempt from checking. Can be provided more than once.
+
+=item * C<fatal>
+
+A boolean, defaulting to false, indicating that missing prereqs will result in
+an immediate abort of the build/release process, without prompting.
+
+=item * C<index_base_url>
+
+When provided, uses this base URL to fetch F<02packages.details.txt.gz>
+instead of the default C<http://www.cpan.org>.  Use this when your
+distribution uses prerequisites found only in your darkpan-like server.
 
 =back
 

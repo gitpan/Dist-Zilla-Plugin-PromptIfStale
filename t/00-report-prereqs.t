@@ -41,6 +41,7 @@ my @modules = qw(
   Test::Fatal
   Test::More
   if
+  lib
   namespace::autoclean
   perl
   strict

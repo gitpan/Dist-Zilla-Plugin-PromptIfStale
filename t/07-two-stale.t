@@ -6,9 +6,13 @@ use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::DZil;
 use Test::Fatal;
 use Test::Deep;
+use File::Spec;
 use Path::Tiny;
 use Moose::Util 'find_meta';
 use version;
+
+use lib 't/lib';
+use NoNetworkHits;
 
 BEGIN {
     use Dist::Zilla::Plugin::PromptIfStale;

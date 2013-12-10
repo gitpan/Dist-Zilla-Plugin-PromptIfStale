@@ -23,6 +23,9 @@ t/08-many-modules.t
 t/10-release-prompt.t
 t/11-local-module.t
 t/12-skip.t
+t/13-fatal.t
+t/14-index-base-url.t
+t/lib/NoNetworkHits.pm
 t/lib/Unindexed.pm
 t/lib/Unindexed0.pm
 t/lib/Unindexed1.pm

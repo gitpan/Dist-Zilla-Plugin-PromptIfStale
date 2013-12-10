@@ -5,9 +5,13 @@ use Test::More;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::DZil;
 use Test::Fatal;
+use File::Spec;
 use Path::Tiny;
 use Test::Deep;
 use Moose::Util 'find_meta';
+
+use lib 't/lib';
+use NoNetworkHits;
 
 # simulate a response from the PAUSE index, without having to do a real HTTP hit
 {

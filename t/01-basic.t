@@ -6,6 +6,7 @@ use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::DZil;
 use Test::Fatal;
 use Test::Deep;
+use File::Spec;
 use Path::Tiny;
 use Moose::Util 'find_meta';
 use version;
@@ -14,6 +15,16 @@ BEGIN {
     use Dist::Zilla::Plugin::PromptIfStale;
     $Dist::Zilla::Plugin::PromptIfStale::VERSION = 9999
         unless $Dist::Zilla::Plugin::PromptIfStale::VERSION;
+}
+
+my @prompts;
+{
+    my $meta = find_meta('Dist::Zilla::Chrome::Test');
+    $meta->make_mutable;
+    $meta->add_before_method_modifier(prompt_str => sub {
+        my ($self, $prompt, $arg) = @_;
+        push @prompts, $prompt;
+    });
 }
 
 SKIP: {
@@ -37,8 +48,10 @@ SKIP: {
     is(
         exception { $tzil->build },
         undef,
-        'no prompts when checking for a module that is not stale',
+        'build succeeded when checking for a module that is not stale',
     );
+
+    is(scalar @prompts, 0, 'there were no prompts') or diag 'got: ', explain \@prompts;
 }
 
 
@@ -46,7 +59,8 @@ SKIP: {
 # we prompt properly about it.
 # This also saves us from having to do a real HTTP hit.
 
-use Dist::Zilla::Plugin::PromptIfStale; # make sure we are loaded!!
+unshift @INC, File::Spec->catdir(qw(t lib));
+require NoNetworkHits;
 
 {
     my $meta = find_meta('Dist::Zilla::Plugin::PromptIfStale');
@@ -61,15 +75,7 @@ use Dist::Zilla::Plugin::PromptIfStale; # make sure we are loaded!!
     });
 }
 
-my @prompts;
-{
-    my $meta = find_meta('Dist::Zilla::Chrome::Test');
-    $meta->make_mutable;
-    $meta->add_before_method_modifier(prompt_str => sub {
-        my ($self, $prompt, $arg) = @_;
-        push @prompts, $prompt;
-    });
-}
+@prompts = ();
 
 my $tzil = Builder->from_config(
     { dist_root => 't/does-not-exist' },

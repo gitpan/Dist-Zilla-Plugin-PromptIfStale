@@ -10,10 +10,12 @@ use Path::Tiny;
 use Moose::Util 'find_meta';
 use List::Util 'first';
 
-use Dist::Zilla::Plugin::PromptIfStale; # make sure we are loaded!!
+use lib 't/lib';
+use NoNetworkHits;
 
 my @modules_queried;
 {
+    use Dist::Zilla::Plugin::PromptIfStale;
     my $meta = find_meta('Dist::Zilla::Plugin::PromptIfStale');
     $meta->make_mutable;
     $meta->add_around_method_modifier(_indexed_version => sub {
@@ -66,11 +68,7 @@ is(
     'build was not halted - there were no prompts',
 );
 
-cmp_deeply(
-    \@prompts,
-    [],
-    'there were no prompts',
-) or diag 'got: ', explain \@prompts;
+is(scalar @prompts, 0, 'there were no prompts') or diag 'got: ', explain \@prompts;
 
 my $build_dir = $tzil->tempdir->subdir('build');
 
