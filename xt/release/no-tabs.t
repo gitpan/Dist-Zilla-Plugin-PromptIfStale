@@ -1,12 +1,13 @@
 use strict;
 use warnings;
 
-# this test was generated with Dist::Zilla::Plugin::Test::NoTabs 0.05
+# this test was generated with Dist::Zilla::Plugin::Test::NoTabs 0.06
 
 use Test::More 0.88;
 use Test::NoTabs;
 
 my @files = (
+    'lib/Dist/Zilla/App/Command/stale.pm',
     'lib/Dist/Zilla/Plugin/PromptIfStale.pm'
 );
 

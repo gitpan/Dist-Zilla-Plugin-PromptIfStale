@@ -1,15 +1,13 @@
 use strict;
 use warnings;
 package Dist::Zilla::Plugin::PromptIfStale;
-{
-  $Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.015';
-}
-# git description: v0.014-9-gc5ecc1b
-
 BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
+# git description: v0.015-16-g3e05448
+$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.016';
 # ABSTRACT: Check at build/release time if modules are out of date
+# vim: set ts=8 sw=4 tw=78 et :
 
 use Moose;
 with 'Dist::Zilla::Role::BeforeBuild',
@@ -44,7 +42,7 @@ has phase => (
 has modules => (
     isa => ArrayRef[Str],
     traits => [ 'Array' ],
-    handles => { modules => 'elements' },
+    handles => { _raw_modules => 'elements' },
     lazy => 1,
     default => sub { [] },
 );
@@ -83,7 +81,8 @@ around dump_config => sub
 
     $config->{'' . __PACKAGE__} = {
         (map { $_ => ($self->$_ || 0) } qw(phase check_all_plugins check_all_prereqs)),
-        (map { $_ => [ $self->$_ ] } qw(modules skip)),
+        skip => [ $self->skip ],
+        modules => [ $self->_raw_modules ],
     };
 
     return $config;
@@ -95,8 +94,9 @@ sub before_build
 
     if ($self->phase eq 'build')
     {
-        my @modules = $self->_modules_before_build;
-        $self->_check_modules(@modules) if @modules;
+        my @modules = uniq $self->_modules_extra, $self->_modules_plugin;
+
+        $self->_prompt_if_stale(@modules) if @modules;
     }
 }
 
@@ -107,7 +107,7 @@ sub after_build
     if ($self->phase eq 'build' and $self->check_all_prereqs)
     {
         my @modules = $self->_modules_prereq;
-        $self->_check_modules(@modules) if @modules;
+        $self->_prompt_if_stale(@modules) if @modules;
     }
 }
 
@@ -116,10 +116,10 @@ sub before_release
     my $self = shift;
     if ($self->phase eq 'release')
     {
-        my @modules = $self->_modules_before_build;
-        push @modules, $self->_modules_prereq
-            if $self->check_all_prereqs;
-        $self->_check_modules( uniq @modules ) if @modules;
+        my @modules = ( $self->_modules_extra, $self->_modules_plugin );
+        push @modules, $self->_modules_prereq if $self->check_all_prereqs;
+
+        $self->_prompt_if_stale(uniq @modules) if @modules;
     }
 }
 
@@ -127,17 +127,14 @@ sub before_release
 # already been checked for, so other instances of this plugin do not duplicate
 # the check.
 my %already_checked;
+sub __clear_already_checked { %already_checked = () } # for testing
 
-sub __clear_already_checked{ %already_checked = () } # for testing
-
-sub _check_modules
+sub stale_modules
 {
     my ($self, @modules) = @_;
 
-    $self->log('checking for stale modules...');
-
-    my (@bad_modules, @prompts, %module_to_filename);
-    foreach my $module (sort { $a cmp $b } @modules)
+    my (@stale_modules, @errors, %module_to_filename);
+    foreach my $module (sort @modules)
     {
         next if $module eq 'perl';
         next if $already_checked{$module};
@@ -146,8 +143,8 @@ sub _check_modules
         if (not $path)
         {
             $already_checked{$module}++;
-            push @bad_modules, $module;
-            push @prompts, $module . ' is not installed.';
+            push @stale_modules, $module;
+            push @errors, $module . ' is not installed.';
             next;
         }
 
@@ -160,7 +157,7 @@ sub _check_modules
         $module_to_filename{$module} = $path;
     }
 
-    foreach my $module (sort { $a cmp $b } keys %module_to_filename)
+    foreach my $module (sort keys %module_to_filename)
     {
         my $indexed_version = $self->_indexed_version($module, !!(keys %module_to_filename > 5));
         my $local_version = Module::Metadata->new_from_file($module_to_filename{$module})->version;
@@ -172,8 +169,8 @@ sub _check_modules
         if (not defined $indexed_version)
         {
             $already_checked{$module}++;
-            push @bad_modules, $module;
-            push @prompts, $module . ' is not indexed.';
+            push @stale_modules, $module;
+            push @errors, $module . ' is not indexed.';
             next;
         }
 
@@ -181,19 +178,29 @@ sub _check_modules
             and $local_version < $indexed_version)
         {
             $already_checked{$module}++;
-            push @bad_modules, $module;
-            push @prompts, 'Indexed version of ' . $module . ' is ' . $indexed_version
+            push @stale_modules, $module;
+            push @errors, 'Indexed version of ' . $module . ' is ' . $indexed_version
                     . ' but you only have ' . $local_version
                     . ' installed.';
             next;
         }
     }
 
-    return if not @prompts;
+    return \@stale_modules, \@errors;
+}
 
-    my $prompt = @prompts > 1
-        ? (join("\n    ", 'Issues found:', @prompts) . "\n")
-        : ($prompts[0] . ' ');
+sub _prompt_if_stale
+{
+    my ($self, @modules) = @_;
+
+    $self->log('checking for stale modules...');
+    my ($stale_modules, $errors) = $self->stale_modules(@modules);
+
+    return if not @$errors;
+
+    my $prompt = @$errors > 1
+        ? (join("\n    ", 'Issues found:', @$errors) . "\n")
+        : ($errors->[0] . ' ');
 
     my $continue;
     if (not $self->fatal)
@@ -203,13 +210,13 @@ sub _check_modules
     }
 
     $self->log_fatal('Aborting ' . $self->phase . "\n"
-        . 'To remedy, do: cpanm ' . join(' ', @bad_modules)) if not $continue;
+        . 'To remedy, do: cpanm ' . join(' ', @$stale_modules)) if not $continue;
 }
 
-has _modules_before_build => (
+has _modules_plugin => (
     isa => 'ArrayRef[Str]',
     traits => ['Array'],
-    handles => { _modules_before_build => 'elements' },
+    handles => { _modules_plugin => 'elements' },
     lazy => 1,
     default => sub {
         my $self = shift;
@@ -217,9 +224,8 @@ has _modules_before_build => (
         return [
             grep { my $module = $_; none { $module eq $_ } @skip }
             uniq
-                $self->modules,
                 $self->check_all_plugins
-                    ? map { blessed $_ } @{ $self->zilla->plugins }
+                    ? map { $_->meta->name } @{ $self->zilla->plugins }
                     : ()
         ];
     },
@@ -244,6 +250,14 @@ has _modules_prereq => (
         ];
     },
 );
+
+sub _modules_extra
+{
+    my $self = shift;
+    my @skip = $self->skip;
+    grep { my $module = $_; none { $module eq $_ } @skip } $self->_raw_modules;
+}
+
 
 my $packages;
 sub _indexed_version
@@ -325,7 +339,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.015
+version 0.016
 
 =head1 SYNOPSIS
 
@@ -395,7 +409,7 @@ distribution uses prerequisites found only in your darkpan-like server.
 
 =back
 
-=for Pod::Coverage mvp_multivalue_args mvp_aliases before_build after_build before_release
+=for Pod::Coverage mvp_multivalue_args mvp_aliases before_build after_build before_release stale_modules
 
 =head1 SUPPORT
 
@@ -406,6 +420,10 @@ I am also usually active on irc, as 'ether' at C<irc.perl.org>.
 =head1 SEE ALSO
 
 =over 4
+
+=item *
+
+the L<dzil stale|Dist::Zilla::App::Command::stale> command in this distribution
 
 =item *
 

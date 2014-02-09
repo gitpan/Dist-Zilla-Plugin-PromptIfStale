@@ -8,7 +8,6 @@ use Test::Fatal;
 use Test::Deep;
 use Path::Tiny;
 use Moose::Util 'find_meta';
-use List::Util 'first';
 
 use lib 't/lib';
 use NoNetworkHits;
@@ -16,6 +15,7 @@ use NoNetworkHits;
 my @modules_queried;
 {
     use Dist::Zilla::Plugin::PromptIfStale;
+    use Dist::Zilla::App::Command::stale;
     my $meta = find_meta('Dist::Zilla::Plugin::PromptIfStale');
     $meta->make_mutable;
     $meta->add_around_method_modifier(_indexed_version => sub {
@@ -39,6 +39,8 @@ my @prompts;
     });
 }
 
+my $checked_app;
+BUILD:
 my $tzil = Builder->from_config(
     { dist_root => 't/does-not-exist' },
     {
@@ -59,6 +61,19 @@ my $tzil = Builder->from_config(
         },
     },
 );
+
+if (not $checked_app++)
+{
+    my $wd = File::pushd::pushd($tzil->root);
+    cmp_deeply(
+        [ Dist::Zilla::App::Command::stale->stale_modules($tzil) ],
+        [ ],
+        'app finds no stale modules',
+    );
+    @modules_queried = ();
+    Dist::Zilla::Plugin::PromptIfStale::__clear_already_checked();
+    goto BUILD;
+}
 
 $tzil->chrome->logger->set_debug(1);
 
