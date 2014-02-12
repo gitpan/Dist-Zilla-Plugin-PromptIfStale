@@ -110,11 +110,11 @@
    "provides" : {
       "Dist::Zilla::App::Command::stale" : {
          "file" : "lib/Dist/Zilla/App/Command/stale.pm",
-         "version" : "0.016"
+         "version" : "0.017"
       },
       "Dist::Zilla::Plugin::PromptIfStale" : {
          "file" : "lib/Dist/Zilla/Plugin/PromptIfStale.pm",
-         "version" : "0.016"
+         "version" : "0.017"
       }
    },
    "release_status" : "stable",
@@ -132,7 +132,7 @@
       "x_IRC" : "irc://irc.perl.org/#distzilla",
       "x_MailingList" : "http://dzil.org/#mailing-list"
    },
-   "version" : "0.016",
+   "version" : "0.017",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.019008"
@@ -170,7 +170,7 @@
                }
             },
             "name" : "@Author::ETHER/build",
-            "version" : null
+            "version" : "0.016"
          },
          {
             "class" : "Dist::Zilla::Plugin::PromptIfStale",
@@ -184,7 +184,7 @@
                }
             },
             "name" : "@Author::ETHER/release",
-            "version" : null
+            "version" : "0.016"
          },
          {
             "class" : "Dist::Zilla::Plugin::ExecDir",
@@ -703,7 +703,7 @@
                }
             },
             "name" : "PromptIfStale",
-            "version" : null
+            "version" : "0.016"
          },
          {
             "class" : "Dist::Zilla::Plugin::Prereqs",

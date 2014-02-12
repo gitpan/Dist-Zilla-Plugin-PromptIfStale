@@ -33,10 +33,10 @@ no_index:
 provides:
   Dist::Zilla::App::Command::stale:
     file: lib/Dist/Zilla/App/Command/stale.pm
-    version: '0.016'
+    version: '0.017'
   Dist::Zilla::Plugin::PromptIfStale:
     file: lib/Dist/Zilla/Plugin/PromptIfStale.pm
-    version: '0.016'
+    version: '0.017'
 requires:
   Cwd: '0'
   Dist::Zilla::App: '0'
@@ -66,7 +66,7 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-Plugin-PromptIfStale
   homepage: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale
   repository: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale.git
-version: '0.016'
+version: '0.017'
 x_Dist_Zilla:
   perl:
     version: '5.019008'
@@ -96,7 +96,7 @@ x_Dist_Zilla:
           phase: build
           skip: []
       name: '@Author::ETHER/build'
-      version: ~
+      version: '0.016'
     -
       class: Dist::Zilla::Plugin::PromptIfStale
       config:
@@ -107,7 +107,7 @@ x_Dist_Zilla:
           phase: release
           skip: []
       name: '@Author::ETHER/release'
-      version: ~
+      version: '0.016'
     -
       class: Dist::Zilla::Plugin::ExecDir
       name: '@Author::ETHER/ExecDir'
@@ -510,7 +510,7 @@ x_Dist_Zilla:
           phase: build
           skip: []
       name: PromptIfStale
-      version: ~
+      version: '0.016'
     -
       class: Dist::Zilla::Plugin::Prereqs
       config:

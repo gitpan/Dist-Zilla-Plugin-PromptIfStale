@@ -5,7 +5,7 @@ BEGIN {
   $Dist::Zilla::App::Command::stale::AUTHORITY = 'cpan:ETHER';
 }
 # ABSTRACT: print your distribution's stale prerequisites and plugins
-$Dist::Zilla::App::Command::stale::VERSION = '0.016';
+$Dist::Zilla::App::Command::stale::VERSION = '0.017';
 use Dist::Zilla::App -command;
 use Dist::Zilla::Plugin::PromptIfStale;
 use List::MoreUtils 'uniq';
@@ -73,7 +73,7 @@ Dist::Zilla::App::Command::stale - print your distribution's stale prerequisites
 
 =head1 VERSION
 
-version 0.016
+version 0.017
 
 =head1 SYNOPSIS
 

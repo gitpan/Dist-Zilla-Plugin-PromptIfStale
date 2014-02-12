@@ -4,8 +4,8 @@ package Dist::Zilla::Plugin::PromptIfStale;
 BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
-# git description: v0.015-16-g3e05448
-$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.016';
+# git description: v0.016-2-g7b9fe3e
+$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.017';
 # ABSTRACT: Check at build/release time if modules are out of date
 # vim: set ts=8 sw=4 tw=78 et :
 
@@ -79,7 +79,7 @@ around dump_config => sub
     my ($orig, $self) = @_;
     my $config = $self->$orig;
 
-    $config->{'' . __PACKAGE__} = {
+    $config->{+__PACKAGE__} = {
         (map { $_ => ($self->$_ || 0) } qw(phase check_all_plugins check_all_prereqs)),
         skip => [ $self->skip ],
         modules => [ $self->_raw_modules ],
@@ -308,7 +308,7 @@ sub _get_packages
     my $base = $self->index_base_url || 'http://www.cpan.org';
 
     my $response = HTTP::Tiny->new->mirror($base . '/modules/' . $filename, $path);
-    $self->log_debug('could not fetch the index?'), return undef if not $response->{success};
+    $self->log('could not fetch the index - network down?'), return undef if not $response->{success};
 
     require Parse::CPAN::Packages::Fast;
     $packages = Parse::CPAN::Packages::Fast->new($path->stringify);
@@ -318,7 +318,9 @@ sub _indexed_version_via_02packages
 {
     my ($self, $module) = @_;
 
-    my $package = $self->_get_packages->package($module);
+    my $packages = $self->_get_packages;
+    return undef if not $packages;
+    my $package = $packages->package($module);
     return undef if not $package;
     version->parse($package->version);
 }
@@ -339,7 +341,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.016
+version 0.017
 
 =head1 SYNOPSIS
 

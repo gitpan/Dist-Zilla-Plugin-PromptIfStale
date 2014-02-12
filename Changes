@@ -1,5 +1,9 @@
 Revision history for Dist-Zilla-Plugin-PromptIfStale
 
+0.017     2014-02-12 05:20:07Z
+          - fix uninitialized warning when 02packages.details.txt cannot be
+            downloaded
+
 0.016     2014-02-09 03:41:16Z
           - new "dzil stale" command
 
