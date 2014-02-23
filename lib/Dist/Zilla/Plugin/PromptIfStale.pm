@@ -4,8 +4,8 @@ package Dist::Zilla::Plugin::PromptIfStale;
 BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
-# git description: v0.016-2-g7b9fe3e
-$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.017';
+# git description: v0.017-4-g968f531
+$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.018';
 # ABSTRACT: Check at build/release time if modules are out of date
 # vim: set ts=8 sw=4 tw=78 et :
 
@@ -94,7 +94,9 @@ sub before_build
 
     if ($self->phase eq 'build')
     {
-        my @modules = uniq $self->_modules_extra, $self->_modules_plugin;
+        my @modules = uniq
+            $self->_modules_extra,
+            ( $self->check_all_plugins ? $self->_modules_plugin : () );
 
         $self->_prompt_if_stale(@modules) if @modules;
     }
@@ -116,7 +118,10 @@ sub before_release
     my $self = shift;
     if ($self->phase eq 'release')
     {
-        my @modules = ( $self->_modules_extra, $self->_modules_plugin );
+        my @modules = (
+            $self->_modules_extra,
+            ( $self->check_all_plugins ? $self->_modules_plugin : () ),
+        );
         push @modules, $self->_modules_prereq if $self->check_all_prereqs;
 
         $self->_prompt_if_stale(uniq @modules) if @modules;
@@ -224,9 +229,7 @@ has _modules_plugin => (
         return [
             grep { my $module = $_; none { $module eq $_ } @skip }
             uniq
-                $self->check_all_plugins
-                    ? map { $_->meta->name } @{ $self->zilla->plugins }
-                    : ()
+            map { $_->meta->name } @{ $self->zilla->plugins }
         ];
     },
 );
@@ -341,7 +344,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.017
+version 0.018
 
 =head1 SYNOPSIS
 
