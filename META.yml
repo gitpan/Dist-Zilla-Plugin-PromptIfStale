@@ -33,10 +33,10 @@ no_index:
 provides:
   Dist::Zilla::App::Command::stale:
     file: lib/Dist/Zilla/App/Command/stale.pm
-    version: '0.018'
+    version: '0.019'
   Dist::Zilla::Plugin::PromptIfStale:
     file: lib/Dist/Zilla/Plugin/PromptIfStale.pm
-    version: '0.018'
+    version: '0.019'
 requires:
   Cwd: '0'
   Dist::Zilla::App: '0'
@@ -66,10 +66,10 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-Plugin-PromptIfStale
   homepage: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale
   repository: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale.git
-version: '0.018'
+version: '0.019'
 x_Dist_Zilla:
   perl:
-    version: '5.019008'
+    version: '5.019009'
   plugins:
     -
       class: Dist::Zilla::Plugin::Bootstrap::lib
@@ -216,7 +216,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::Test::PodSpelling
       name: '@Author::ETHER/Test::PodSpelling'
-      version: '2.006005'
+      version: '2.006006'
     -
       class: Dist::Zilla::Plugin::Test::Pod::No404s
       name: '@Author::ETHER/Test::Pod::No404s'
@@ -431,7 +431,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::Run::AfterBuild
       name: '@Author::ETHER/Run::AfterBuild'
-      version: '0.020'
+      version: '0.021'
     -
       class: Dist::Zilla::Plugin::Git::Check
       name: '@Author::ETHER/initial check'
@@ -500,6 +500,10 @@ x_Dist_Zilla:
       class: Dist::Zilla::Plugin::ConfirmRelease
       name: '@Author::ETHER/ConfirmRelease'
       version: '5.013'
+    -
+      class: Dist::Zilla::Plugin::VerifyPhases
+      name: '@Author::ETHER/PHASE VERIFICATION'
+      version: '0.001'
     -
       class: Dist::Zilla::Plugin::PromptIfStale
       config:

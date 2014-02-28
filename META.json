@@ -30,7 +30,7 @@
       },
       "develop" : {
          "recommends" : {
-            "Dist::Zilla::PluginBundle::Author::ETHER" : "0.051"
+            "Dist::Zilla::PluginBundle::Author::ETHER" : "0.052"
          },
          "requires" : {
             "Dist::Zilla" : "5.013",
@@ -110,11 +110,11 @@
    "provides" : {
       "Dist::Zilla::App::Command::stale" : {
          "file" : "lib/Dist/Zilla/App/Command/stale.pm",
-         "version" : "0.018"
+         "version" : "0.019"
       },
       "Dist::Zilla::Plugin::PromptIfStale" : {
          "file" : "lib/Dist/Zilla/Plugin/PromptIfStale.pm",
-         "version" : "0.018"
+         "version" : "0.019"
       }
    },
    "release_status" : "stable",
@@ -132,10 +132,10 @@
       "x_IRC" : "irc://irc.perl.org/#distzilla",
       "x_MailingList" : "http://dzil.org/#mailing-list"
    },
-   "version" : "0.018",
+   "version" : "0.019",
    "x_Dist_Zilla" : {
       "perl" : {
-         "version" : "5.019008"
+         "version" : "5.019009"
       },
       "plugins" : [
          {
@@ -325,7 +325,7 @@
          {
             "class" : "Dist::Zilla::Plugin::Test::PodSpelling",
             "name" : "@Author::ETHER/Test::PodSpelling",
-            "version" : "2.006005"
+            "version" : "2.006006"
          },
          {
             "class" : "Dist::Zilla::Plugin::Test::Pod::No404s",
@@ -603,7 +603,7 @@
          {
             "class" : "Dist::Zilla::Plugin::Run::AfterBuild",
             "name" : "@Author::ETHER/Run::AfterBuild",
-            "version" : "0.020"
+            "version" : "0.021"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::Check",
@@ -690,6 +690,11 @@
             "class" : "Dist::Zilla::Plugin::ConfirmRelease",
             "name" : "@Author::ETHER/ConfirmRelease",
             "version" : "5.013"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::VerifyPhases",
+            "name" : "@Author::ETHER/PHASE VERIFICATION",
+            "version" : "0.001"
          },
          {
             "class" : "Dist::Zilla::Plugin::PromptIfStale",
