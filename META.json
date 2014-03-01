@@ -68,6 +68,7 @@
             "Dist::Zilla::Role::AfterBuild" : "0",
             "Dist::Zilla::Role::BeforeBuild" : "0",
             "Dist::Zilla::Role::BeforeRelease" : "0",
+            "Dist::Zilla::Util::AuthorDeps" : "0",
             "Encode" : "0",
             "File::Temp" : "0",
             "HTTP::Tiny" : "0",
@@ -79,7 +80,9 @@
             "Moose::Util::TypeConstraints" : "0",
             "MooseX::Types::Moose" : "0",
             "Parse::CPAN::Packages::Fast" : "0",
+            "Path::Class" : "0",
             "Path::Tiny" : "0",
+            "Try::Tiny" : "0",
             "namespace::autoclean" : "0",
             "perl" : "5.010",
             "strict" : "0",
@@ -93,9 +96,11 @@
             "CPAN::Meta::Requirements" : "2.120900"
          },
          "requires" : {
+            "Dist::Zilla::App::Tester" : "0",
             "ExtUtils::MakeMaker" : "0",
             "File::Spec" : "0",
             "File::Spec::Functions" : "0",
+            "File::pushd" : "0",
             "List::Util" : "0",
             "Moose::Util" : "0",
             "Test::DZil" : "0",
@@ -110,11 +115,11 @@
    "provides" : {
       "Dist::Zilla::App::Command::stale" : {
          "file" : "lib/Dist/Zilla/App/Command/stale.pm",
-         "version" : "0.019"
+         "version" : "0.020"
       },
       "Dist::Zilla::Plugin::PromptIfStale" : {
          "file" : "lib/Dist/Zilla/Plugin/PromptIfStale.pm",
-         "version" : "0.019"
+         "version" : "0.020"
       }
    },
    "release_status" : "stable",
@@ -132,7 +137,7 @@
       "x_IRC" : "irc://irc.perl.org/#distzilla",
       "x_MailingList" : "http://dzil.org/#mailing-list"
    },
-   "version" : "0.019",
+   "version" : "0.020",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.019009"

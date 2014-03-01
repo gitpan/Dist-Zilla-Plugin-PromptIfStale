@@ -4,8 +4,8 @@ package Dist::Zilla::Plugin::PromptIfStale;
 BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
-# git description: v0.018-1-g8a77643
-$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.019';
+# git description: v0.019-5-ga1434a9
+$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.020';
 # ABSTRACT: Check at build/release time if modules are out of date
 # vim: set ts=8 sw=4 tw=78 et :
 
@@ -344,7 +344,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.019
+version 0.020
 
 =head1 SYNOPSIS
 

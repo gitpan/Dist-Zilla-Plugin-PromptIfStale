@@ -27,6 +27,9 @@ t/11-local-module.t
 t/12-skip.t
 t/13-fatal.t
 t/14-index-base-url.t
+t/15-command.t
+t/16-command-all.t
+t/17-command-missing-plugins.t
 t/lib/NoNetworkHits.pm
 t/lib/Unindexed.pm
 t/lib/Unindexed0.pm

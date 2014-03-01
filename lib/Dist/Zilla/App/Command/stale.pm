@@ -5,9 +5,10 @@ BEGIN {
   $Dist::Zilla::App::Command::stale::AUTHORITY = 'cpan:ETHER';
 }
 # ABSTRACT: print your distribution's stale prerequisites and plugins
-$Dist::Zilla::App::Command::stale::VERSION = '0.019';
+$Dist::Zilla::App::Command::stale::VERSION = '0.020';
 use Dist::Zilla::App -command;
 use List::MoreUtils 'uniq';
+use Try::Tiny;
 use namespace::autoclean;
 
 sub abstract { "print your distribution's stale prerequisites and plugins" }
@@ -28,7 +29,8 @@ sub stale_modules
     if (not @plugins)
     {
         require Dist::Zilla::Plugin::PromptIfStale;
-        push @plugins, Dist::Zilla::Plugin::PromptIfStale->new;
+        push @plugins,
+            Dist::Zilla::Plugin::PromptIfStale->new(zilla => $zilla, plugin_name => 'stale_command');
     }
 
     my @modules = map {
@@ -61,8 +63,37 @@ sub execute
 {
     my ($self, $opt) = @_; # $arg
 
-    $self->app->chrome->logger->mute;
-    print join("\n", $self->stale_modules($self->zilla, $opt->all), '');
+    $self->app->chrome->logger->mute unless $self->app->global_options->verbose;
+
+    my $zilla = try {
+        $self->zilla;
+    }
+    catch {
+        die $_ unless /Run 'dzil authordeps' to see a list of all required plugins/m;
+
+        # some plugins are not installed; running authordeps...
+
+        $self->app->chrome->logger->unmute;
+
+        require Dist::Zilla::Util::AuthorDeps;
+        require Path::Class;
+        $self->log(Dist::Zilla::Util::AuthorDeps::format_author_deps(
+            Dist::Zilla::Util::AuthorDeps::extract_author_deps(
+                Path::Class::dir('.'),  # ugh!
+                1,                      # --missing
+            ),
+            (),                         # --versions
+        ));
+
+        undef;  # ensure $zilla = undef
+    };
+
+    return if not $zilla;
+
+    my @stale_modules = $self->stale_modules($zilla, $opt->all);
+
+    $self->app->chrome->logger->unmute;
+    $self->log(join("\n", @stale_modules));
 }
 
 1;
@@ -73,7 +104,7 @@ __END__
 
 =encoding UTF-8
 
-=for :stopwords Karen Etheridge David Golden
+=for :stopwords Karen Etheridge
 
 =head1 NAME
 
@@ -81,7 +112,7 @@ Dist::Zilla::App::Command::stale - print your distribution's stale prerequisites
 
 =head1 VERSION
 
-version 0.019
+version 0.020
 
 =head1 SYNOPSIS
 
