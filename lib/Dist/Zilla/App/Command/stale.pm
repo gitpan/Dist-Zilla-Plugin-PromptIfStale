@@ -5,7 +5,7 @@ BEGIN {
   $Dist::Zilla::App::Command::stale::AUTHORITY = 'cpan:ETHER';
 }
 # ABSTRACT: print your distribution's stale prerequisites and plugins
-$Dist::Zilla::App::Command::stale::VERSION = '0.020';
+$Dist::Zilla::App::Command::stale::VERSION = '0.021';
 use Dist::Zilla::App -command;
 use List::MoreUtils 'uniq';
 use Try::Tiny;
@@ -69,7 +69,9 @@ sub execute
         $self->zilla;
     }
     catch {
-        die $_ unless /Run 'dzil authordeps' to see a list of all required plugins/m;
+        die $_ unless
+            m/Run 'dzil authordeps' to see a list of all required plugins/m
+            or m/ version \(.+\) (does )?not match required version: /m;
 
         # some plugins are not installed; running authordeps...
 
@@ -104,7 +106,7 @@ __END__
 
 =encoding UTF-8
 
-=for :stopwords Karen Etheridge
+=for :stopwords Karen Etheridge David Golden
 
 =head1 NAME
 
@@ -112,7 +114,7 @@ Dist::Zilla::App::Command::stale - print your distribution's stale prerequisites
 
 =head1 VERSION
 
-version 0.020
+version 0.021
 
 =head1 SYNOPSIS
 
