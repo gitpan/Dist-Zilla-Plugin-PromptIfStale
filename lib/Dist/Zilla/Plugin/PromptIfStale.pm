@@ -4,8 +4,8 @@ package Dist::Zilla::Plugin::PromptIfStale;
 BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
-# git description: v0.020-3-g14d9b82
-$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.021';
+# git description: v0.021-3-gfc5321a
+$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.022';
 # ABSTRACT: Check at build/release time if modules are out of date
 # vim: set ts=8 sw=4 tw=78 et :
 
@@ -98,7 +98,7 @@ sub before_build
             $self->_modules_extra,
             ( $self->check_all_plugins ? $self->_modules_plugin : () );
 
-        $self->_prompt_if_stale(@modules) if @modules;
+        $self->_check_modules(@modules) if @modules;
     }
 }
 
@@ -109,7 +109,7 @@ sub after_build
     if ($self->phase eq 'build' and $self->check_all_prereqs)
     {
         my @modules = $self->_modules_prereq;
-        $self->_prompt_if_stale(@modules) if @modules;
+        $self->_check_modules(@modules) if @modules;
     }
 }
 
@@ -124,7 +124,7 @@ sub before_release
         );
         push @modules, $self->_modules_prereq if $self->check_all_prereqs;
 
-        $self->_prompt_if_stale(uniq @modules) if @modules;
+        $self->_check_modules(uniq @modules) if @modules;
     }
 }
 
@@ -194,7 +194,7 @@ sub stale_modules
     return \@stale_modules, \@errors;
 }
 
-sub _prompt_if_stale
+sub _check_modules
 {
     my ($self, @modules) = @_;
 
@@ -344,7 +344,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.021
+version 0.022
 
 =head1 SYNOPSIS
 
@@ -425,6 +425,10 @@ I am also usually active on irc, as 'ether' at C<irc.perl.org>.
 =head1 SEE ALSO
 
 =over 4
+
+=item *
+
+the L<[EnsureNotStale]|Dist::Zilla::Plugin::EnsureNotStale> plugin in this distribution
 
 =item *
 

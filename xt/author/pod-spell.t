@@ -21,6 +21,7 @@ Dist
 Zilla
 Plugin
 PromptIfStale
+EnsureNotStale
 App
 Command
 stale
