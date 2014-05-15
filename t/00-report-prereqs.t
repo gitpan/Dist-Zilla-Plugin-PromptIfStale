@@ -45,24 +45,23 @@ my %exclude = map {; $_ => 1 } qw(
 my $static_prereqs = do { my $x = {
        'configure' => {
                         'requires' => {
-                                        'ExtUtils::MakeMaker' => '6.30',
-                                        'Module::Build::Tiny' => '0.035'
+                                        'ExtUtils::MakeMaker' => '6.30'
                                       }
                       },
        'develop' => {
                       'recommends' => {
-                                        'Dist::Zilla::PluginBundle::Author::ETHER' => '0.058'
+                                        'Dist::Zilla::PluginBundle::Author::ETHER' => '0.063'
                                       },
                       'requires' => {
-                                      'Dist::Zilla' => '5.015',
+                                      'Dist::Zilla' => '5.016',
                                       'Dist::Zilla::Plugin::Bootstrap::lib' => '0',
                                       'Dist::Zilla::Plugin::CheckSelfDependency' => '0.007',
                                       'Dist::Zilla::Plugin::ContributorsFromGit' => '0',
+                                      'Dist::Zilla::Plugin::DynamicPrereqs' => '0',
                                       'Dist::Zilla::Plugin::GitHub::Update' => '0',
                                       'Dist::Zilla::Plugin::GithubMeta' => '0',
-                                      'Dist::Zilla::Plugin::MakeMaker::Fallback' => '0.008',
+                                      'Dist::Zilla::Plugin::MakeMaker' => '0',
                                       'Dist::Zilla::Plugin::MetaResources' => '0',
-                                      'Dist::Zilla::Plugin::ModuleBuildTiny' => '0.004',
                                       'Dist::Zilla::Plugin::Prereqs' => '0',
                                       'Dist::Zilla::Plugin::PromptIfStale' => '0',
                                       'Dist::Zilla::Plugin::Test::CleanNamespaces' => '0',
@@ -124,6 +123,7 @@ my $static_prereqs = do { my $x = {
                                    'File::Spec::Functions' => '0',
                                    'File::pushd' => '0',
                                    'List::Util' => '0',
+                                   'Module::Runtime' => '0',
                                    'Moose::Util' => '0',
                                    'Test::DZil' => '0',
                                    'Test::Deep' => '0',

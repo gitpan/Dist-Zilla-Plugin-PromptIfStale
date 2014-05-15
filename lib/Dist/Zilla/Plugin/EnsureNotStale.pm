@@ -6,7 +6,7 @@ BEGIN {
 }
 # ABSTRACT: Abort at build/release time if modules are out of date
 # vim: set ts=8 sw=4 tw=78 et :
-$Dist::Zilla::Plugin::EnsureNotStale::VERSION = '0.022';
+$Dist::Zilla::Plugin::EnsureNotStale::VERSION = '0.023';
 use Moose;
 extends 'Dist::Zilla::Plugin::PromptIfStale';
 use namespace::autoclean;
@@ -24,15 +24,13 @@ __END__
 
 =encoding UTF-8
 
-=for :stopwords Karen Etheridge irc
-
 =head1 NAME
 
 Dist::Zilla::Plugin::EnsureNotStale - Abort at build/release time if modules are out of date
 
 =head1 VERSION
 
-version 0.022
+version 0.023
 
 =head1 SYNOPSIS
 
@@ -53,6 +51,8 @@ All options are as for L<[PromptIfStale]|Dist::Zilla::Plugin::PromptIfStale>,
 except C<fatal> cannot be passed or set (it is always true).
 
 =head1 SUPPORT
+
+=for stopwords irc
 
 Bugs may be submitted through L<the RT bug tracker|https://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-Plugin-PromptIfStale>
 (or L<bug-Dist-Zilla-Plugin-PromptIfStale@rt.cpan.org|mailto:bug-Dist-Zilla-Plugin-PromptIfStale@rt.cpan.org>).

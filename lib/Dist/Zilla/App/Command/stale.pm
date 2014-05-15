@@ -4,10 +4,10 @@ package Dist::Zilla::App::Command::stale;
 BEGIN {
   $Dist::Zilla::App::Command::stale::AUTHORITY = 'cpan:ETHER';
 }
-# ABSTRACT: print your distribution's stale prerequisites and plugins
-$Dist::Zilla::App::Command::stale::VERSION = '0.022';
+# ABSTRACT: print your distribution's prerequisites and plugins that are out of date
+$Dist::Zilla::App::Command::stale::VERSION = '0.023';
 use Dist::Zilla::App -command;
-use List::MoreUtils 'uniq';
+use List::MoreUtils qw(uniq any);
 use Try::Tiny;
 use namespace::autoclean;
 
@@ -33,14 +33,11 @@ sub stale_modules
             Dist::Zilla::Plugin::PromptIfStale->new(zilla => $zilla, plugin_name => 'stale_command');
     }
 
-    my @modules = map {
-        $_->_modules_extra,
-        ( $all || $_->check_all_plugins ? $_->_modules_plugin : () ),
-    } @plugins;
+    my @modules;
 
     # ugh, we need to do nearly a full build to get the prereqs
     # (this really should be abstracted better in Dist::Zilla::Dist::Builder)
-    if ($all or grep { $_->check_all_prereqs } @plugins)
+    if ($all or any { $_->check_all_prereqs } @plugins)
     {
         $_->before_build for grep { not $_->isa('Dist::Zilla::Plugin::PromptIfStale') }
             @{ $zilla->plugins_with(-BeforeBuild) };
@@ -50,7 +47,17 @@ sub stale_modules
         $_->munge_files  for @{ $zilla->plugins_with(-FileMunger) };
         $_->register_prereqs for @{ $zilla->plugins_with(-PrereqSource) };
 
-        push @modules, $plugins[0]->_modules_prereq;
+        push @modules, map {
+            ( $all || $_->check_all_prereqs ? $_->_modules_prereq : () ),
+        } @plugins;
+    }
+
+    foreach my $plugin (@plugins)
+    {
+        push @modules,
+            ( $all || $plugin->check_authordeps ? $plugin->_authordeps : () ),
+            $plugin->_modules_extra,
+            ( $all || $plugin->check_all_plugins ? $plugin->_modules_plugin : () );
     }
 
     return if not @modules;
@@ -74,12 +81,12 @@ sub execute
             m/Run 'dzil authordeps' to see a list of all required plugins/m
             or m/ version \(.+\) (does )?not match required version: /m;
 
-        # some plugins are not installed; running authordeps...
+        # some plugins are not installed; running authordeps --missing...
 
-        my $authordeps = $self->_get_authordeps;
+        my @authordeps = $self->_missing_authordeps;
 
         $self->app->chrome->logger->unmute;
-        $self->log($authordeps);
+        $self->log(join("\n", @authordeps));
 
         undef;  # ensure $zilla = undef
     };
@@ -92,26 +99,24 @@ sub execute
     catch {
         # if there was an error during the build, fall back to fetching
         # authordeps, in the hopes that we can report something helpful
-        $self->_get_authordeps;
+        $self->_missing_authordeps;
     };
 
     $self->app->chrome->logger->unmute;
     $self->log(join("\n", @stale_modules));
 }
 
-sub _get_authordeps
+sub _missing_authordeps
 {
     my $self = shift;
 
     require Dist::Zilla::Util::AuthorDeps;
     require Path::Class;
-    Dist::Zilla::Util::AuthorDeps::format_author_deps(
-        Dist::Zilla::Util::AuthorDeps::extract_author_deps(
+    my @authordeps = map { (%$_)[0] }
+        @{ Dist::Zilla::Util::AuthorDeps::extract_author_deps(
             Path::Class::dir('.'),  # ugh!
-            1,                      # --missing
-        ),
-        (),                         # --versions
-    );
+                1,                  # --missing
+           ) };
 }
 
 1;
@@ -122,15 +127,13 @@ __END__
 
 =encoding UTF-8
 
-=for :stopwords Karen Etheridge David Golden
-
 =head1 NAME
 
-Dist::Zilla::App::Command::stale - print your distribution's stale prerequisites and plugins
+Dist::Zilla::App::Command::stale - print your distribution's prerequisites and plugins that are out of date
 
 =head1 VERSION
 
-version 0.022
+version 0.023
 
 =head1 SYNOPSIS
 

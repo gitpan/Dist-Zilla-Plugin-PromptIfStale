@@ -9,6 +9,7 @@ use Test::Deep;
 use Path::Tiny;
 use Moose::Util 'find_meta';
 use File::Spec;
+use File::pushd 'pushd';
 use Dist::Zilla::App::Command::stale;
 
 use lib 't/lib';
@@ -40,7 +41,7 @@ my $tzil = Builder->from_config(
 );
 
 {
-    my $wd = File::pushd::pushd($tzil->root);
+    my $wd = pushd $tzil->root;
     cmp_deeply(
         [ Dist::Zilla::App::Command::stale->stale_modules($tzil) ],
         [ ],
@@ -67,7 +68,7 @@ cmp_deeply(
         re(qr/^\Q[DZ] writing DZT-Sample in /),
     ),
     'module skipped, due to being local',
-) or diag 'got: ', explain $tzil->log_messages;
+) or diag 'saw log messages: ', explain $tzil->log_messages;
 
 is(scalar @prompts, 0, 'there were no prompts');
 

@@ -4,8 +4,8 @@ package Dist::Zilla::Plugin::PromptIfStale;
 BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
-# git description: v0.021-3-gfc5321a
-$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.022';
+# git description: v0.022-16-g11e8bcb
+$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.023';
 # ABSTRACT: Check at build/release time if modules are out of date
 # vim: set ts=8 sw=4 tw=78 et :
 
@@ -45,6 +45,11 @@ has modules => (
     handles => { _raw_modules => 'elements' },
     lazy => 1,
     default => sub { [] },
+);
+
+has check_authordeps => (
+    is => 'ro', isa => Bool,
+    default => 0,
 );
 
 has check_all_plugins => (
@@ -96,6 +101,7 @@ sub before_build
     {
         my @modules = uniq
             $self->_modules_extra,
+            ( $self->check_authordeps ? $self->_authordeps : () ),
             ( $self->check_all_plugins ? $self->_modules_plugin : () );
 
         $self->_check_modules(@modules) if @modules;
@@ -120,6 +126,7 @@ sub before_release
     {
         my @modules = (
             $self->_modules_extra,
+            ( $self->check_authordeps ? $self->_authordeps : () ),
             ( $self->check_all_plugins ? $self->_modules_plugin : () ),
         );
         push @modules, $self->_modules_prereq if $self->check_all_prereqs;
@@ -134,14 +141,17 @@ sub before_release
 my %already_checked;
 sub __clear_already_checked { %already_checked = () } # for testing
 
+# module name to absolute filename where the file can be found
+my %module_to_filename;
+
 sub stale_modules
 {
     my ($self, @modules) = @_;
 
-    my (@stale_modules, @errors, %module_to_filename);
+    my (@stale_modules, @errors);
     foreach my $module (sort @modules)
     {
-        next if $module eq 'perl';
+        $already_checked{$module}++ if $module eq 'perl';
         next if $already_checked{$module};
 
         my $path = module_path($module);
@@ -153,18 +163,21 @@ sub stale_modules
             next;
         }
 
+        $module_to_filename{$module} = $path;
+
         # ignore modules in the dist currently being built
         my $relative_path = path($path)->relative(getcwd);
         $self->log_debug($module . ' provided locally (at ' . $relative_path
-                . '); skipping version check'), next
+                . '); skipping version check'),
+                $already_checked{$module}++
             unless $relative_path =~ m/^\.\./;
-
-        $module_to_filename{$module} = $path;
     }
 
-    foreach my $module (sort keys %module_to_filename)
+    @modules = sort grep { !$already_checked{$_} } @modules;
+
+    foreach my $module (@modules)
     {
-        my $indexed_version = $self->_indexed_version($module, !!(keys %module_to_filename > 5));
+        my $indexed_version = $self->_indexed_version($module, !!(@modules > 5));
         my $local_version = Module::Metadata->new_from_file($module_to_filename{$module})->version;
 
         $self->log_debug('comparing indexed vs. local version for ' . $module
@@ -184,14 +197,15 @@ sub stale_modules
         {
             $already_checked{$module}++;
             push @stale_modules, $module;
-            push @errors, 'Indexed version of ' . $module . ' is ' . $indexed_version
+            push @errors,
+                $module . ' is indexed at version ' . $indexed_version
                     . ' but you only have ' . $local_version
                     . ' installed.';
             next;
         }
     }
 
-    return \@stale_modules, \@errors;
+    return [ sort @stale_modules ], [ sort @errors ];
 }
 
 sub _check_modules
@@ -218,6 +232,25 @@ sub _check_modules
         . 'To remedy, do: cpanm ' . join(' ', @$stale_modules)) if not $continue;
 }
 
+has _authordeps => (
+    isa => 'ArrayRef[Str]',
+    traits => ['Array'],
+    handles => { _authordeps => 'elements' },
+    lazy => 1,
+    default => sub {
+        my $self = shift;
+        require Dist::Zilla::Util::AuthorDeps;
+        require Path::Class;
+        my @skip = $self->skip;
+        [
+            grep { my $module = $_; none { $module eq $_ } @skip }
+            uniq
+            map { (%$_)[0] }
+                @{ Dist::Zilla::Util::AuthorDeps::extract_author_deps(Path::Class::dir('.')) }
+        ];
+    },
+);
+
 has _modules_plugin => (
     isa => 'ArrayRef[Str]',
     traits => ['Array'],
@@ -226,7 +259,7 @@ has _modules_plugin => (
     default => sub {
         my $self = shift;
         my @skip = $self->skip;
-        return [
+        [
             grep { my $module = $_; none { $module eq $_ } @skip }
             uniq
             map { $_->meta->name } @{ $self->zilla->plugins }
@@ -336,15 +369,13 @@ __END__
 
 =encoding UTF-8
 
-=for :stopwords Karen Etheridge David Golden darkpan irc
-
 =head1 NAME
 
 Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are out of date
 
 =head1 VERSION
 
-version 0.022
+version 0.023
 
 =head1 SYNOPSIS
 
@@ -385,6 +416,18 @@ this plugin twice, with different names.)
 
 The name of a module to check for. Can be provided more than once.
 
+=item * C<check_authordeps>
+
+=for stopwords authordeps
+
+A boolean, defaulting to false, indicating that all authordeps in F<dist.ini>
+(like what is done by C<< dzil authordeps >>) should be checked.
+
+As long as this option is not explicitly set to false, a check is always made
+for authordeps being installed (but the indexed version is not checked). This
+serves as a fast way to guard against a build blowing up later through the
+inadvertent lack of fulfillment of an explicit C<< ; authordep >> declaration.
+
 =item * C<check_all_plugins>
 
 A boolean, defaulting to false, indicating that all plugins being used to
@@ -408,15 +451,37 @@ an immediate abort of the build/release process, without prompting.
 
 =item * C<index_base_url>
 
+=for stopwords darkpan
+
 When provided, uses this base URL to fetch F<02packages.details.txt.gz>
 instead of the default C<http://www.cpan.org>.  Use this when your
 distribution uses prerequisites found only in your darkpan-like server.
 
 =back
 
-=for Pod::Coverage mvp_multivalue_args mvp_aliases before_build after_build before_release stale_modules
+=for Pod::Coverage mvp_multivalue_args mvp_aliases before_build after_build before_release
+
+=head1 METHODS
+
+=head2 stale_modules
+
+Given a list of modules to check, returns
+
+=over 4
+
+=item *
+
+a list reference of modules that are stale (not installed or the version is not at least the latest indexed version
+
+=item *
+
+a list reference of error messages describing the issues found
+
+=back
 
 =head1 SUPPORT
+
+=for stopwords irc
 
 Bugs may be submitted through L<the RT bug tracker|https://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-Plugin-PromptIfStale>
 (or L<bug-Dist-Zilla-Plugin-PromptIfStale@rt.cpan.org|mailto:bug-Dist-Zilla-Plugin-PromptIfStale@rt.cpan.org>).

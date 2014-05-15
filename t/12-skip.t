@@ -8,6 +8,7 @@ use Test::Fatal;
 use Test::Deep;
 use Path::Tiny;
 use Moose::Util 'find_meta';
+use File::pushd 'pushd';
 
 use lib 't/lib';
 use NoNetworkHits;
@@ -64,7 +65,7 @@ my $tzil = Builder->from_config(
 
 if (not $checked_app++)
 {
-    my $wd = File::pushd::pushd($tzil->root);
+    my $wd = pushd $tzil->root;
     cmp_deeply(
         [ Dist::Zilla::App::Command::stale->stale_modules($tzil) ],
         [ ],
@@ -96,7 +97,7 @@ cmp_deeply(
         re(qr/^\Q[DZ] writing DZT-Sample in /),
     ),
     'build completed successfully',
-) or diag 'got: ', explain $tzil->log_messages;
+) or diag 'saw log messages: ', explain $tzil->log_messages;
 
 cmp_deeply(
     \@modules_queried,

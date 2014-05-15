@@ -9,6 +9,7 @@ use Test::Deep;
 use File::Spec;
 use Path::Tiny;
 use Moose::Util 'find_meta';
+use File::pushd 'pushd';
 use version;
 
 BEGIN {
@@ -47,7 +48,7 @@ SKIP: {
     );
 
     {
-        my $wd = File::pushd::pushd($tzil->root);
+        my $wd = pushd $tzil->root;
         cmp_deeply(
             [ Dist::Zilla::App::Command::stale->stale_modules($tzil) ],
             [],
@@ -103,7 +104,7 @@ my $tzil = Builder->from_config(
 );
 
 {
-    my $wd = File::pushd::pushd($tzil->root);
+    my $wd = pushd $tzil->root;
     cmp_deeply(
         [ Dist::Zilla::App::Command::stale->stale_modules($tzil) ],
         [ 'strict' ],
@@ -112,7 +113,7 @@ my $tzil = Builder->from_config(
     Dist::Zilla::Plugin::PromptIfStale::__clear_already_checked();
 }
 
-my $prompt = 'Indexed version of strict is 200.0 but you only have ' . strict->VERSION
+my $prompt = 'strict is indexed at version 200.0 but you only have ' . strict->VERSION
     . ' installed. Continue anyway?';
 $tzil->chrome->set_response_for($prompt, 'y');
 
@@ -131,6 +132,6 @@ cmp_deeply(
         re(qr/^\Q[DZ] writing DZT-Sample in /),
     ),
     'build completed successfully',
-) or diag 'got: ', explain $tzil->log_messages;
+) or diag 'saw log messages: ', explain $tzil->log_messages;
 
 done_testing;

@@ -9,6 +9,7 @@ use Test::Deep;
 use Path::Tiny;
 use Moose::Util 'find_meta';
 use version;
+use File::pushd 'pushd';
 use Dist::Zilla::App::Command::stale;
 
 use lib 't/lib';
@@ -55,7 +56,7 @@ my $tzil = Builder->from_config(
 );
 
 {
-    my $wd = File::pushd::pushd($tzil->root);
+    my $wd = pushd $tzil->root;
     cmp_deeply(
         [ Dist::Zilla::App::Command::stale->stale_modules($tzil) ],
         [ 'Indexed::But::Not::Installed' ],
@@ -85,6 +86,6 @@ cmp_deeply(
     $tzil->log_messages,
     superbagof("[PromptIfStale] Aborting build\n[PromptIfStale] To remedy, do: cpanm Indexed::But::Not::Installed"),
     'build was aborted, with remedy instructions',
-) or diag 'got: ', explain $tzil->log_messages;
+) or diag 'saw log messages: ', explain $tzil->log_messages;
 
 done_testing;

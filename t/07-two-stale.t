@@ -10,6 +10,7 @@ use File::Spec;
 use Path::Tiny;
 use Moose::Util 'find_meta';
 use version;
+use File::pushd 'pushd';
 use Dist::Zilla::App::Command::stale;
 
 use lib 't/lib';
@@ -78,7 +79,7 @@ $tzil->chrome->logger->set_debug(1);
 unshift @INC, File::Spec->catdir($tzil->tempdir, qw(t lib));
 
 {
-    my $wd = File::pushd::pushd($tzil->root);
+    my $wd = pushd $tzil->root;
     cmp_deeply(
         [ Dist::Zilla::App::Command::stale->stale_modules($tzil) ],
         [ 'Indexed::But::Not::Installed', 'Unindexed' ],
@@ -104,6 +105,6 @@ cmp_deeply(
     $tzil->log_messages,
     superbagof("[PromptIfStale] Aborting build\n[PromptIfStale] To remedy, do: cpanm Indexed::But::Not::Installed Unindexed"),
     'build was aborted, with remedy instructions',
-) or diag 'got: ', explain $tzil->log_messages;
+) or diag 'saw log messages: ', explain $tzil->log_messages;
 
 done_testing;
