@@ -6,7 +6,7 @@ BEGIN {
 }
 # ABSTRACT: Abort at build/release time if modules are out of date
 # vim: set ts=8 sw=4 tw=78 et :
-$Dist::Zilla::Plugin::EnsureNotStale::VERSION = '0.023';
+$Dist::Zilla::Plugin::EnsureNotStale::VERSION = '0.024';
 use Moose;
 extends 'Dist::Zilla::Plugin::PromptIfStale';
 use namespace::autoclean;
@@ -30,7 +30,7 @@ Dist::Zilla::Plugin::EnsureNotStale - Abort at build/release time if modules are
 
 =head1 VERSION
 
-version 0.023
+version 0.024
 
 =head1 SYNOPSIS
 

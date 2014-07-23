@@ -4,9 +4,10 @@ package Dist::Zilla::Plugin::PromptIfStale;
 BEGIN {
   $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
 }
-# git description: v0.022-16-g11e8bcb
-$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.023';
+# git description: v0.023-17-g4253fe2
+$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.024';
 # ABSTRACT: Check at build/release time if modules are out of date
+# KEYWORDS: prerequisites upstream dependencies modules metadata update stale
 # vim: set ts=8 sw=4 tw=78 et :
 
 use Moose;
@@ -16,15 +17,16 @@ with 'Dist::Zilla::Role::BeforeBuild',
 
 use Moose::Util::TypeConstraints;
 use MooseX::Types::Moose qw(ArrayRef Bool Str);
-use List::MoreUtils qw(uniq none);
+use List::Util 1.33 'none';
+use List::MoreUtils 'uniq';
 use version;
 use Path::Tiny;
 use Cwd;
 use HTTP::Tiny;
-use Encode;
-use JSON;
+use JSON::MaybeXS;
 use Module::Path 'module_path';
 use Module::Metadata;
+use Module::CoreList 3.10;  # covers latest stable perl, 5.20.0
 use namespace::autoclean;
 
 sub mvp_multivalue_args { qw(modules skip) }
@@ -196,11 +198,21 @@ sub stale_modules
             and $local_version < $indexed_version)
         {
             $already_checked{$module}++;
-            push @stale_modules, $module;
-            push @errors,
-                $module . ' is indexed at version ' . $indexed_version
-                    . ' but you only have ' . $local_version
-                    . ' installed.';
+
+            if (Module::CoreList::is_core($module) and not $self->_is_duallifed($module))
+            {
+                $self->log_debug('core module ' . $module . ' is indexed at version '
+                    . $indexed_version . ' but you only have ' . $local_version
+                    . ' installed. You need to use update your perl to get the latest version.');
+            }
+            else
+            {
+                push @stale_modules, $module;
+                push @errors,
+                    $module . ' is indexed at version ' . $indexed_version
+                        . ' but you only have ' . $local_version . ' installed.';
+            }
+
             next;
         }
     }
@@ -294,6 +306,29 @@ sub _modules_extra
     grep { my $module = $_; none { $module eq $_ } @skip } $self->_raw_modules;
 }
 
+# this ought to be in Module::CoreList -- TODO :)
+sub _is_duallifed
+{
+    my ($self, $module) = @_;
+
+    return if not Module::CoreList::is_core($module);
+
+    # Module::CoreList doesn't tell us this information at all right now - for
+    # blead-upstream dual-lifed modules, and non-dual-lifed modules, it
+    # returns all the same data points. :(  Right now all we can do is query
+    # the index and see what dist it belongs to -- luckily, it still lists the
+    # cpan dist for dual-lifed modules that are more recent in core than on
+    # CPAN (e.g. Carp in June 2014 is 1.34 in 5.20.0 but 1.3301 on cpan).
+
+    my $res = HTTP::Tiny->new->get("http://cpanidx.org/cpanidx/json/mod/$module");
+    $self->log('could not query the index?'), return undef if not $res->{success};
+
+    my $payload = JSON::MaybeXS->new(utf8 => 0)->decode($res->{content});
+
+    $self->log('invalid payload returned?'), return undef unless $payload;
+    $self->log_debug($module . ' not indexed'), return undef if not defined $payload->[0]{dist_name};
+    $payload->[0]{dist_name} ne 'perl';
+}
 
 my $packages;
 sub _indexed_version
@@ -316,14 +351,11 @@ sub _indexed_version_via_query
     die 'should not be here - get 02packages instead' if $self->index_base_url;
 
     my $res = HTTP::Tiny->new->get("http://cpanidx.org/cpanidx/json/mod/$module");
-    $self->log_debug('could not query the index?'), return undef if not $res->{success};
+    $self->log('could not query the index?'), return undef if not $res->{success};
 
-    # JSON wants UTF-8 bytestreams, so we need to re-encode no matter what
-    # encoding we got. -- rjbs, 2011-08-18 (in Dist::Zilla)
-    my $json_octets = Encode::encode_utf8($res->{content});
-    my $payload = JSON::->new->decode($json_octets);
+    my $payload = JSON::MaybeXS->new(utf8 => 0)->decode($res->{content});
 
-    $self->log_debug('invalid payload returned?'), return undef unless $payload;
+    $self->log('invalid payload returned?'), return undef unless $payload;
     $self->log_debug($module . ' not indexed'), return undef if not defined $payload->[0]{mod_vers};
     version->parse($payload->[0]{mod_vers});
 }
@@ -336,10 +368,9 @@ sub _get_packages
     my $self = shift;
     return $packages if $packages;
 
-    require File::Temp;
-    my $tempdir = File::Temp::tempdir(CLEANUP => 1);
+    my $tempdir = Path::Tiny->tempdir(CLEANUP => 1);
     my $filename = '02packages.details.txt.gz';
-    my $path = path($tempdir, $filename);
+    my $path = $tempdir->child($filename);
 
     my $base = $self->index_base_url || 'http://www.cpan.org';
 
@@ -375,7 +406,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.023
+version 0.024
 
 =head1 SYNOPSIS
 

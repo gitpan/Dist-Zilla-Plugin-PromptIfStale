@@ -6,7 +6,6 @@ use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::DZil;
 use Test::Fatal;
 use Test::Deep;
-use File::Spec;
 use Path::Tiny;
 use Moose::Util 'find_meta';
 use File::pushd 'pushd';
@@ -110,7 +109,7 @@ sub do_tests
                 ),
                 path(qw(source lib Foo.pm)) => "package Foo;\n1;\n",
             },
-            also_copy => { 't/lib' => 't/lib' },
+            also_copy => { 't/corpus' => 't/lib' },
         },
     );
 
@@ -125,8 +124,9 @@ sub do_tests
 
     $tzil->chrome->logger->set_debug(1);
 
+    # ensure we find the library, not in a local directory, before we change directories
     local @INC = @INC;
-    unshift @INC, File::Spec->catdir($tzil->tempdir, qw(t lib));
+    unshift @INC, path($tzil->tempdir, qw(t lib))->stringify;
 
     if (not $checked_app++)
     {

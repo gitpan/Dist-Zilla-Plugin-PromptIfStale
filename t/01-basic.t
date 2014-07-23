@@ -6,7 +6,6 @@ use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::DZil;
 use Test::Fatal;
 use Test::Deep;
-use File::Spec;
 use Path::Tiny;
 use Moose::Util 'find_meta';
 use File::pushd 'pushd';
@@ -31,6 +30,7 @@ my @prompts;
 }
 
 SKIP: {
+    # Note that this test uses the network to query the index for our own module.
     skip('this test can always be expected to work only for the author', 1)
         unless $ENV{AUTHOR_TESTING};
 
@@ -72,7 +72,8 @@ SKIP: {
 # we prompt properly about it.
 # This also saves us from having to do a real HTTP hit.
 
-unshift @INC, File::Spec->catdir(qw(t lib));
+# ensure we find the helper module, before we change directories
+unshift @INC, path(qw(t lib))->absolute->stringify;
 require NoNetworkHits;
 
 {
@@ -83,7 +84,7 @@ require NoNetworkHits;
         my $self = shift;
         my ($module) = @_;
 
-        return version->parse('200.0') if $module eq 'strict';
+        return version->parse('200.0') if $module eq 'StaleModule';
         die 'should not be checking for ' . $module;
     });
 }
@@ -96,30 +97,37 @@ my $tzil = Builder->from_config(
         add_files => {
             path(qw(source dist.ini)) => simple_ini(
                 [ GatherDir => ],
-                [ 'PromptIfStale' => { modules => [ 'strict' ], phase => 'build' } ],
+                [ 'PromptIfStale' => { modules => [ 'StaleModule' ], phase => 'build' } ],
             ),
             path(qw(source lib Foo.pm)) => "package Foo;\n1;\n",
         },
+        also_copy => { 't/lib' => 't/lib' },
     },
 );
+
+my $prompt = 'StaleModule is indexed at version 200.0 but you only have 1.0 installed. Continue anyway?';
+$tzil->chrome->set_response_for($prompt, 'y');
+
+$tzil->chrome->logger->set_debug(1);
+
+# ensure we find the library, not in a local directory, before we change directories
+unshift @INC, path($tzil->tempdir, qw(t lib))->stringify;
 
 {
     my $wd = pushd $tzil->root;
     cmp_deeply(
         [ Dist::Zilla::App::Command::stale->stale_modules($tzil) ],
-        [ 'strict' ],
+        [ 'StaleModule' ],
         'app finds stale modules',
     );
     Dist::Zilla::Plugin::PromptIfStale::__clear_already_checked();
 }
 
-my $prompt = 'strict is indexed at version 200.0 but you only have ' . strict->VERSION
-    . ' installed. Continue anyway?';
-$tzil->chrome->set_response_for($prompt, 'y');
-
-$tzil->chrome->logger->set_debug(1);
-
-$tzil->build;
+is(
+    exception { $tzil->build },
+    undef,
+    'build proceeds normally',
+);
 
 cmp_deeply(\@prompts, [ $prompt ], 'we were indeed prompted');
 
@@ -128,7 +136,7 @@ my $build_dir = path($tzil->tempdir)->child('build');
 cmp_deeply(
     $tzil->log_messages,
     superbagof(
-        '[PromptIfStale] comparing indexed vs. local version for strict: indexed=200.0; local version=' . strict->VERSION,
+        '[PromptIfStale] comparing indexed vs. local version for StaleModule: indexed=200.0; local version=1.0',
         re(qr/^\Q[DZ] writing DZT-Sample in /),
     ),
     'build completed successfully',

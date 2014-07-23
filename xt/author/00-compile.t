@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 
-# this test was generated with Dist::Zilla::Plugin::Test::Compile 2.040
+# this test was generated with Dist::Zilla::Plugin::Test::Compile 2.043
 
 use Test::More 0.94 tests => 3 + ($ENV{AUTHOR_TESTING} ? 1 : 0);
 

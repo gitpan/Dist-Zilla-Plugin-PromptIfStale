@@ -8,7 +8,6 @@ use Test::Fatal;
 use Test::Deep;
 use Path::Tiny;
 use Moose::Util 'find_meta';
-use File::Spec;
 use File::pushd 'pushd';
 use Dist::Zilla::App::Command::stale;
 
@@ -36,10 +35,13 @@ my $tzil = Builder->from_config(
             ),
             path(qw(source lib Foo.pm)) => "package Foo;\n1;\n",
         },
-        also_copy => { 't/lib' => 'source/t/lib' },
+        # copy the module to the source directory, because that's where $tzil->build chdirs
+        also_copy => { 't/corpus' => 'source/t/lib' },
     },
 );
 
+# find the library in the source dir, so that it is a directory beneath the current dir
+unshift @INC, path($tzil->tempdir, qw(source t lib))->stringify;
 {
     my $wd = pushd $tzil->root;
     cmp_deeply(
@@ -50,8 +52,6 @@ my $tzil = Builder->from_config(
     Dist::Zilla::Plugin::PromptIfStale::__clear_already_checked();
 }
 
-# munge @INC so it contains the source dir
-unshift @INC, File::Spec->catdir($tzil->tempdir, qw(source t lib));
 
 $tzil->chrome->logger->set_debug(1);
 

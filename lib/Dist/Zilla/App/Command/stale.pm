@@ -5,9 +5,11 @@ BEGIN {
   $Dist::Zilla::App::Command::stale::AUTHORITY = 'cpan:ETHER';
 }
 # ABSTRACT: print your distribution's prerequisites and plugins that are out of date
-$Dist::Zilla::App::Command::stale::VERSION = '0.023';
+# vim: set ts=8 sw=4 tw=78 et :
+$Dist::Zilla::App::Command::stale::VERSION = '0.024';
 use Dist::Zilla::App -command;
-use List::MoreUtils qw(uniq any);
+use List::Util 1.33 'any';
+use List::MoreUtils 'uniq';
 use Try::Tiny;
 use namespace::autoclean;
 
@@ -115,7 +117,7 @@ sub _missing_authordeps
     my @authordeps = map { (%$_)[0] }
         @{ Dist::Zilla::Util::AuthorDeps::extract_author_deps(
             Path::Class::dir('.'),  # ugh!
-                1,                  # --missing
+            1,                      # --missing
            ) };
 }
 
@@ -133,11 +135,11 @@ Dist::Zilla::App::Command::stale - print your distribution's prerequisites and p
 
 =head1 VERSION
 
-version 0.023
+version 0.024
 
 =head1 SYNOPSIS
 
-  $ dzil stale | cpanm
+  $ dzil stale --all | cpanm
 
 =head1 DESCRIPTION
 
@@ -161,6 +163,24 @@ in a local L<[PromptIfStale]|Dist::Zilla::Plugin::PromptIfStale>
 configuration, if there is one).
 
 =for Pod::Coverage stale_modules
+
+=head1 SUPPORT
+
+=for stopwords irc
+
+Bugs may be submitted through L<the RT bug tracker|https://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-Plugin-PromptIfStale>
+(or L<bug-Dist-Zilla-Plugin-PromptIfStale@rt.cpan.org|mailto:bug-Dist-Zilla-Plugin-PromptIfStal@rt.cpan.org>).
+I am also usually active on irc, as 'ether' at C<irc.perl.org>.
+
+=head1 SEE ALSO
+
+=over 4
+
+=item *
+
+L<Dist::Zilla::Plugin::PromptIfStale>
+
+=back
 
 =head1 AUTHOR
 
