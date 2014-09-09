@@ -1,12 +1,9 @@
 use strict;
 use warnings;
 package Dist::Zilla::App::Command::stale;
-BEGIN {
-  $Dist::Zilla::App::Command::stale::AUTHORITY = 'cpan:ETHER';
-}
 # ABSTRACT: print your distribution's prerequisites and plugins that are out of date
 # vim: set ts=8 sw=4 tw=78 et :
-$Dist::Zilla::App::Command::stale::VERSION = '0.024';
+$Dist::Zilla::App::Command::stale::VERSION = '0.025';
 use Dist::Zilla::App -command;
 use List::Util 1.33 'any';
 use List::MoreUtils 'uniq';
@@ -135,7 +132,7 @@ Dist::Zilla::App::Command::stale - print your distribution's prerequisites and p
 
 =head1 VERSION
 
-version 0.024
+version 0.025
 
 =head1 SYNOPSIS
 

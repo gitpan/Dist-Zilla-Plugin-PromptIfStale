@@ -1,12 +1,9 @@
 use strict;
 use warnings;
 package Dist::Zilla::Plugin::EnsureNotStale;
-BEGIN {
-  $Dist::Zilla::Plugin::EnsureNotStale::AUTHORITY = 'cpan:ETHER';
-}
 # ABSTRACT: Abort at build/release time if modules are out of date
 # vim: set ts=8 sw=4 tw=78 et :
-$Dist::Zilla::Plugin::EnsureNotStale::VERSION = '0.024';
+$Dist::Zilla::Plugin::EnsureNotStale::VERSION = '0.025';
 use Moose;
 extends 'Dist::Zilla::Plugin::PromptIfStale';
 use namespace::autoclean;
@@ -30,7 +27,7 @@ Dist::Zilla::Plugin::EnsureNotStale - Abort at build/release time if modules are
 
 =head1 VERSION
 
-version 0.024
+version 0.025
 
 =head1 SYNOPSIS
 

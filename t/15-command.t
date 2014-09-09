@@ -9,12 +9,12 @@ use Path::Tiny;
 use File::pushd 'pushd';
 use Moose::Util 'find_meta';
 use Dist::Zilla::App::Command::stale;   # load this now, before we change directories
-use Dist::Zilla::Plugin::PromptIfStale;
 
 use lib 't/lib';
 use NoNetworkHits;
 
 {
+    use Dist::Zilla::Plugin::PromptIfStale;
     my $meta = find_meta('Dist::Zilla::Plugin::PromptIfStale');
     $meta->make_mutable;
     $meta->add_around_method_modifier(_indexed_version => sub {
@@ -80,6 +80,9 @@ use NoNetworkHits;
         ) . "\n",
         'stale modules and prereqs found, as configured in all PromptIfStale plugins',
     );
+
+    diag 'got result', explain $result
+        if not Test::Builder->new->is_passing;
 }
 
 done_testing;

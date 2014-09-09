@@ -9,6 +9,7 @@ use Test::Deep;
 use Path::Tiny;
 use Moose::Util 'find_meta';
 use File::pushd 'pushd';
+use Dist::Zilla::App::Command::stale;
 
 use lib 't/lib';
 use NoNetworkHits;
@@ -16,7 +17,6 @@ use NoNetworkHits;
 my @modules_queried;
 {
     use Dist::Zilla::Plugin::PromptIfStale;
-    use Dist::Zilla::App::Command::stale;
     my $meta = find_meta('Dist::Zilla::Plugin::PromptIfStale');
     $meta->make_mutable;
     $meta->add_around_method_modifier(_indexed_version => sub {
@@ -86,8 +86,6 @@ is(
 
 is(scalar @prompts, 0, 'there were no prompts') or diag 'got: ', explain \@prompts;
 
-my $build_dir = path($tzil->tempdir)->child('build');
-
 my @expected_checked = (qw(Carp Storable), map { 'Dist::Zilla::Plugin::' . $_ } qw(GatherDir PromptIfStale FinderCode));
 
 cmp_deeply(
@@ -97,12 +95,15 @@ cmp_deeply(
         re(qr/^\Q[DZ] writing DZT-Sample in /),
     ),
     'build completed successfully',
-) or diag 'saw log messages: ', explain $tzil->log_messages;
+);
 
 cmp_deeply(
     \@modules_queried,
     bag(@expected_checked),
     'all modules, from both configs, are checked',
 );
+
+diag 'got log messages: ', explain $tzil->log_messages
+    if not Test::Builder->new->is_passing;
 
 done_testing;

@@ -1,11 +1,8 @@
 use strict;
 use warnings;
 package Dist::Zilla::Plugin::PromptIfStale;
-BEGIN {
-  $Dist::Zilla::Plugin::PromptIfStale::AUTHORITY = 'cpan:ETHER';
-}
-# git description: v0.023-17-g4253fe2
-$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.024';
+# git description: v0.024-8-gb5912c7
+$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.025';
 # ABSTRACT: Check at build/release time if modules are out of date
 # KEYWORDS: prerequisites upstream dependencies modules metadata update stale
 # vim: set ts=8 sw=4 tw=78 et :
@@ -229,15 +226,28 @@ sub _check_modules
 
     return if not @$errors;
 
-    my $prompt = @$errors > 1
-        ? (join("\n    ", 'Issues found:', @$errors) . "\n")
-        : ($errors->[0] . ' ');
+    my $message = @$errors > 1
+        ? join("\n    ", 'Issues found:', @$errors)
+        : $errors->[0];
+
+    # just issue a warning if not being run interactively (e.g. travis)
+    if (not (-t STDIN && (-t STDOUT || !(-f STDOUT || -c STDOUT))))
+    {
+        $self->log($message . "\n" . 'To remedy, do: cpanm ' . join(' ', @$stale_modules));
+        return;
+    }
 
     my $continue;
-    if (not $self->fatal)
+    if ($self->fatal)
     {
-        $prompt .= 'Continue anyway?';
-        $continue = $self->zilla->chrome->prompt_yn($prompt, { default => 0 });
+        $self->log($message);
+    }
+    else
+    {
+        $continue = $self->zilla->chrome->prompt_yn(
+            $message . (@$errors > 1 ? "\n" : ' ') . 'Continue anyway?',
+            { default => 0 },
+        );
     }
 
     $self->log_fatal('Aborting ' . $self->phase . "\n"
@@ -406,7 +416,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.024
+version 0.025
 
 =head1 SYNOPSIS
 
@@ -548,6 +558,8 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =head1 CONTRIBUTOR
+
+=for stopwords David Golden
 
 David Golden <dagolden@cpan.org>
 

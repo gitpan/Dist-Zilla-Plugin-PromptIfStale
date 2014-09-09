@@ -14,14 +14,9 @@ use Dist::Zilla::App::Command::stale;
 use lib 't/lib';
 use NoNetworkHits;
 
-BEGIN {
-    use Dist::Zilla::Plugin::PromptIfStale;
-    $Dist::Zilla::Plugin::PromptIfStale::VERSION = 9999
-        unless $Dist::Zilla::Plugin::PromptIfStale::VERSION;
-}
-
 my @checked_via_02packages;
 {
+    use Dist::Zilla::Plugin::PromptIfStale;
     my $meta = find_meta('Dist::Zilla::Plugin::PromptIfStale');
     $meta->make_mutable;
     $meta->add_around_method_modifier(_indexed_version_via_query => sub {
@@ -91,11 +86,11 @@ my $http_url;
         Dist::Zilla::Plugin::PromptIfStale::__clear_already_checked();
     }
 
-    $tzil->chrome->logger->set_debug(1);
-
     # ensure we find the library, not in a local directory, before we change directories
     local @INC = @INC;
     unshift @INC, path($tzil->tempdir, qw(t lib))->stringify;
+
+    $tzil->chrome->logger->set_debug(1);
 
     like(
         exception { $tzil->build },
@@ -113,9 +108,15 @@ my $http_url;
 
     cmp_deeply(
         $tzil->log_messages,
-        superbagof("[PromptIfStale] Aborting build\n[PromptIfStale] To remedy, do: cpanm " . join(' ', map { 'Unindexed' . $_ } 0..5)),
+        superbagof(
+            "[PromptIfStale] Issues found:\n" . join("\n", map { '[PromptIfStale]     Unindexed' . $_ . ' is not indexed.' } 0..5),
+            "[PromptIfStale] Aborting build\n[PromptIfStale] To remedy, do: cpanm " . join(' ', map { 'Unindexed' . $_ } 0..5)
+        ),
         'build was aborted, with remedy instructions',
-    ) or diag 'saw log messages: ', explain $tzil->log_messages;
+    );
+
+    diag 'got log messages: ', explain $tzil->log_messages
+        if not Test::Builder->new->is_passing;
 }
 
 done_testing;

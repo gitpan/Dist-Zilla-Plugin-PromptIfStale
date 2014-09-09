@@ -17,9 +17,8 @@ use NoNetworkHits;
 
 # simulate a response from the PAUSE index, without having to do a real HTTP hit
 
-use Dist::Zilla::Plugin::PromptIfStale; # make sure we are loaded!!
-
 {
+    use Dist::Zilla::Plugin::PromptIfStale;
     my $meta = find_meta('Dist::Zilla::Plugin::PromptIfStale');
     $meta->make_mutable;
     $meta->add_around_method_modifier(_indexed_version => sub {
@@ -86,6 +85,9 @@ cmp_deeply(
     $tzil->log_messages,
     superbagof("[PromptIfStale] Aborting build\n[PromptIfStale] To remedy, do: cpanm Indexed::But::Not::Installed"),
     'build was aborted, with remedy instructions',
-) or diag 'saw log messages: ', explain $tzil->log_messages;
+);
+
+diag 'got log messages: ', explain $tzil->log_messages
+    if not Test::Builder->new->is_passing;
 
 done_testing;
