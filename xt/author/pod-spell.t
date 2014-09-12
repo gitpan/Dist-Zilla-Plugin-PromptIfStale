@@ -20,8 +20,8 @@ lib
 Dist
 Zilla
 Plugin
-EnsureNotStale
 PromptIfStale
+EnsureNotStale
 App
 Command
 stale

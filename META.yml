@@ -17,8 +17,7 @@ build_requires:
   lib: '0'
 configure_requires:
   ExtUtils::MakeMaker: '0'
-  Module::Build::Tiny: '0.038'
-dynamic_config: 0
+dynamic_config: 1
 generated_by: 'Dist::Zilla version 5.020, CPAN::Meta::Converter version 2.142060'
 keywords:
   - prerequisites
@@ -40,13 +39,13 @@ no_index:
 provides:
   Dist::Zilla::App::Command::stale:
     file: lib/Dist/Zilla/App/Command/stale.pm
-    version: '0.025'
+    version: '0.026'
   Dist::Zilla::Plugin::EnsureNotStale:
     file: lib/Dist/Zilla/Plugin/EnsureNotStale.pm
-    version: '0.025'
+    version: '0.026'
   Dist::Zilla::Plugin::PromptIfStale:
     file: lib/Dist/Zilla/Plugin/PromptIfStale.pm
-    version: '0.025'
+    version: '0.026'
 requires:
   Cwd: '0'
   Dist::Zilla::App: '0'
@@ -80,10 +79,10 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-Plugin-PromptIfStale
   homepage: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale
   repository: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale.git
-version: '0.025'
+version: '0.026'
 x_Dist_Zilla:
   perl:
-    version: '5.021003'
+    version: '5.018002'
   plugins:
     -
       class: Dist::Zilla::Plugin::Bootstrap::lib
@@ -467,35 +466,12 @@ x_Dist_Zilla:
       name: '@Author::ETHER/pluginbundle_version'
       version: '5.020'
     -
-      class: Dist::Zilla::Plugin::MakeMaker::Fallback
+      class: Dist::Zilla::Plugin::MakeMaker
       config:
         Dist::Zilla::Role::TestRunner:
           default_jobs: 9
-      name: '@Author::ETHER/MakeMaker::Fallback'
-      version: '0.013'
-    -
-      class: Dist::Zilla::Plugin::ModuleBuildTiny::Fallback
-      config:
-        Dist::Zilla::Plugin::ModuleBuildTiny::Fallback:
-          plugins:
-            -
-              class: Dist::Zilla::Plugin::ModuleBuild
-              config:
-                Dist::Zilla::Role::TestRunner:
-                  default_jobs: 9
-              name: ModuleBuildTiny::Fallback
-              version: '5.020'
-            -
-              class: Dist::Zilla::Plugin::ModuleBuildTiny
-              config:
-                Dist::Zilla::Role::TestRunner:
-                  default_jobs: 9
-              name: ModuleBuildTiny::Fallback
-              version: '0.007'
-        Dist::Zilla::Role::TestRunner:
-          default_jobs: 9
-      name: '@Author::ETHER/ModuleBuildTiny::Fallback'
-      version: '0.006'
+      name: '@Author::ETHER/MakeMaker'
+      version: '5.020'
     -
       class: Dist::Zilla::Plugin::InstallGuide
       name: '@Author::ETHER/InstallGuide'
@@ -626,7 +602,7 @@ x_Dist_Zilla:
         Dist::Zilla::Plugin::Git::Tag:
           branch: ~
           signed: 0
-          tag: v0.025
+          tag: v0.026
           tag_format: v%v%t
           tag_message: v%v%t
           time_zone: local
@@ -687,6 +663,18 @@ x_Dist_Zilla:
           type: requires
       name: DevelopRequires
       version: '5.020'
+    -
+      class: Dist::Zilla::Plugin::RemovePrereqs
+      config:
+        Dist::Zilla::Plugin::RemovePrereqs:
+          modules_to_remove:
+            - IO::Pty
+      name: RemovePrereqs
+      version: '5.020'
+    -
+      class: Dist::Zilla::Plugin::DynamicPrereqs
+      name: DynamicPrereqs
+      version: '0.006'
     -
       class: Dist::Zilla::Plugin::Test::CleanNamespaces
       config:
