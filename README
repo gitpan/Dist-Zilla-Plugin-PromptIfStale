@@ -1,7 +1,7 @@
 
 
 This archive contains the distribution Dist-Zilla-Plugin-PromptIfStale,
-version 0.026:
+version 0.027:
 
   Check at build/release time if modules are out of date
 

@@ -60,7 +60,7 @@ my %WriteMakefileArgs = (
     "if" => 0,
     "lib" => 0
   },
-  "VERSION" => "0.026",
+  "VERSION" => "0.027",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -107,9 +107,9 @@ my %FallbackPrereqs = (
   "warnings" => 0
 );
 
-# inserted by Dist::Zilla::Plugin::DynamicPrereqs 0.006
+# inserted by Dist::Zilla::Plugin::DynamicPrereqs 0.007
 $WriteMakefileArgs{TEST_REQUIRES}{'IO::Pty'} = $FallbackPrereqs{'IO::Pty'} = '0'
-if $^O ne 'MSWin32';
+  if $^O ne 'MSWin32';
 
 
 
