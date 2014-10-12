@@ -1,8 +1,8 @@
 use strict;
 use warnings;
 package Dist::Zilla::Plugin::PromptIfStale;
-# git description: v0.026-2-g0c88cc0
-$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.027';
+# git description: v0.027-3-gd51da15
+$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.028';
 # ABSTRACT: Check at build/release time if modules are out of date
 # KEYWORDS: prerequisites upstream dependencies modules metadata update stale
 # vim: set ts=8 sw=4 tw=78 et :
@@ -416,7 +416,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.027
+version 0.028
 
 =head1 SYNOPSIS
 

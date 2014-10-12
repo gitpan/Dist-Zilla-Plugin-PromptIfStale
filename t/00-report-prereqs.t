@@ -61,6 +61,9 @@ sub _merge_prereqs {
 
 my @include = qw(
   CPAN::Meta::Validator
+  JSON::PP
+  JSON::XS
+  Cpanel::JSON::XS
 );
 
 my @exclude = qw(
