@@ -3,7 +3,7 @@ use warnings;
 package Dist::Zilla::App::Command::stale;
 # ABSTRACT: print your distribution's prerequisites and plugins that are out of date
 # vim: set ts=8 sw=4 tw=78 et :
-$Dist::Zilla::App::Command::stale::VERSION = '0.028';
+$Dist::Zilla::App::Command::stale::VERSION = '0.029';
 use Dist::Zilla::App -command;
 use List::Util 1.33 'any';
 use List::MoreUtils 'uniq';
@@ -110,12 +110,13 @@ sub _missing_authordeps
     my $self = shift;
 
     require Dist::Zilla::Util::AuthorDeps;
-    require Path::Class;
+    Dist::Zilla::Util::AuthorDeps->VERSION(5.021);
     my @authordeps = map { (%$_)[0] }
         @{ Dist::Zilla::Util::AuthorDeps::extract_author_deps(
-            Path::Class::dir('.'),  # ugh!
-            1,                      # --missing
-           ) };
+            '.',            # repository root
+            1,              # --missing
+          )
+        };
 }
 
 1;
@@ -132,7 +133,7 @@ Dist::Zilla::App::Command::stale - print your distribution's prerequisites and p
 
 =head1 VERSION
 
-version 0.028
+version 0.029
 
 =head1 SYNOPSIS
 

@@ -1,12 +1,13 @@
 do { my $x = {
        'configure' => {
                         'requires' => {
-                                        'ExtUtils::MakeMaker' => '0'
+                                        'ExtUtils::MakeMaker' => '0',
+                                        'perl' => '5.010'
                                       }
                       },
        'develop' => {
                       'recommends' => {
-                                        'Dist::Zilla::PluginBundle::Author::ETHER' => '0.075'
+                                        'Dist::Zilla::PluginBundle::Author::ETHER' => '0.078'
                                       },
                       'requires' => {
                                       'Dist::Zilla' => '5',
@@ -22,7 +23,6 @@ do { my $x = {
                                       'Dist::Zilla::Plugin::ConfirmRelease' => '0',
                                       'Dist::Zilla::Plugin::CopyFilesFromRelease' => '0',
                                       'Dist::Zilla::Plugin::DynamicPrereqs' => '0.007',
-                                      'Dist::Zilla::Plugin::EOLTests' => '0',
                                       'Dist::Zilla::Plugin::ExecDir' => '0',
                                       'Dist::Zilla::Plugin::FileFinder::ByName' => '0',
                                       'Dist::Zilla::Plugin::GenerateFile::ShareDir' => '0',
@@ -72,6 +72,7 @@ do { my $x = {
                                       'Dist::Zilla::Plugin::Test::ChangesHasContent' => '0',
                                       'Dist::Zilla::Plugin::Test::CleanNamespaces' => '0',
                                       'Dist::Zilla::Plugin::Test::Compile' => '2.039',
+                                      'Dist::Zilla::Plugin::Test::EOL' => '0.14',
                                       'Dist::Zilla::Plugin::Test::Kwalitee' => '0',
                                       'Dist::Zilla::Plugin::Test::MinimumVersion' => '2.000003',
                                       'Dist::Zilla::Plugin::Test::NoTabs' => '0',
@@ -90,6 +91,7 @@ do { my $x = {
                                       'Test::CPAN::Changes' => '0.19',
                                       'Test::CPAN::Meta' => '0',
                                       'Test::CleanNamespaces' => '0.15',
+                                      'Test::EOL' => '0',
                                       'Test::Kwalitee' => '1.21',
                                       'Test::More' => '0.94',
                                       'Test::NoTabs' => '0',
@@ -107,19 +109,20 @@ do { my $x = {
                                       'Dist::Zilla::Role::AfterBuild' => '0',
                                       'Dist::Zilla::Role::BeforeBuild' => '0',
                                       'Dist::Zilla::Role::BeforeRelease' => '0',
-                                      'Dist::Zilla::Util::AuthorDeps' => '0',
+                                      'Dist::Zilla::Util::AuthorDeps' => '5.021',
+                                      'Encode' => '0',
+                                      'HTTP::Headers' => '0',
                                       'HTTP::Tiny' => '0',
                                       'JSON::MaybeXS' => '0',
                                       'List::MoreUtils' => '0',
                                       'List::Util' => '1.33',
                                       'Module::CoreList' => '3.10',
                                       'Module::Metadata' => '0',
-                                      'Module::Path' => '0',
+                                      'Module::Path' => '0.15',
                                       'Moose' => '0',
                                       'Moose::Util::TypeConstraints' => '0',
                                       'MooseX::Types::Moose' => '0',
                                       'Parse::CPAN::Packages::Fast' => '0',
-                                      'Path::Class' => '0',
                                       'Path::Tiny' => '0',
                                       'Try::Tiny' => '0',
                                       'namespace::autoclean' => '0',
@@ -145,7 +148,8 @@ do { my $x = {
                                    'Test::Fatal' => '0',
                                    'Test::More' => '0',
                                    'if' => '0',
-                                   'lib' => '0'
+                                   'lib' => '0',
+                                   'perl' => '5.010'
                                  }
                  }
      };

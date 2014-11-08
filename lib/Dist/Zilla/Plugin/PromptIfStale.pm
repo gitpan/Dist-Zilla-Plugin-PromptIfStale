@@ -1,8 +1,8 @@
 use strict;
 use warnings;
 package Dist::Zilla::Plugin::PromptIfStale;
-# git description: v0.027-3-gd51da15
-$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.028';
+# git description: v0.028-6-g362ed5e
+$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.029';
 # ABSTRACT: Check at build/release time if modules are out of date
 # KEYWORDS: prerequisites upstream dependencies modules metadata update stale
 # vim: set ts=8 sw=4 tw=78 et :
@@ -21,9 +21,10 @@ use Path::Tiny;
 use Cwd;
 use HTTP::Tiny;
 use JSON::MaybeXS;
-use Module::Path 'module_path';
+use Module::Path 0.15 'module_path';
 use Module::Metadata;
-use Module::CoreList 3.10;  # covers latest stable perl, 5.20.0
+use Module::CoreList 3.10;  # includes information about the 5.20.0 release
+use Encode ();
 use namespace::autoclean;
 
 sub mvp_multivalue_args { qw(modules skip) }
@@ -148,7 +149,7 @@ sub stale_modules
     my ($self, @modules) = @_;
 
     my (@stale_modules, @errors);
-    foreach my $module (sort @modules)
+    foreach my $module (uniq sort @modules)
     {
         $already_checked{$module}++ if $module eq 'perl';
         next if $already_checked{$module};
@@ -172,7 +173,7 @@ sub stale_modules
             unless $relative_path =~ m/^\.\./;
     }
 
-    @modules = sort grep { !$already_checked{$_} } @modules;
+    @modules = grep { !$already_checked{$_} } @modules;
 
     foreach my $module (@modules)
     {
@@ -262,13 +263,13 @@ has _authordeps => (
     default => sub {
         my $self = shift;
         require Dist::Zilla::Util::AuthorDeps;
-        require Path::Class;
+        Dist::Zilla::Util::AuthorDeps->VERSION(5.021);
         my @skip = $self->skip;
         [
             grep { my $module = $_; none { $module eq $_ } @skip }
             uniq
             map { (%$_)[0] }
-                @{ Dist::Zilla::Util::AuthorDeps::extract_author_deps(Path::Class::dir('.')) }
+                @{ Dist::Zilla::Util::AuthorDeps::extract_author_deps('.') }
         ];
     },
 );
@@ -333,7 +334,15 @@ sub _is_duallifed
     my $res = HTTP::Tiny->new->get("http://cpanidx.org/cpanidx/json/mod/$module");
     $self->log('could not query the index?'), return undef if not $res->{success};
 
-    my $payload = JSON::MaybeXS->new(utf8 => 0)->decode($res->{content});
+    my $data = $res->{content};
+
+    require HTTP::Headers;
+    if (my $charset = HTTP::Headers->new(%{ $res->{headers} })->content_type_charset)
+    {
+        $data = Encode::decode($charset, $data, Encode::FB_CROAK);
+    }
+
+    my $payload = JSON::MaybeXS->new(utf8 => 0)->decode($data);
 
     $self->log('invalid payload returned?'), return undef unless $payload;
     $self->log_debug($module . ' not indexed'), return undef if not defined $payload->[0]{dist_name};
@@ -363,7 +372,15 @@ sub _indexed_version_via_query
     my $res = HTTP::Tiny->new->get("http://cpanidx.org/cpanidx/json/mod/$module");
     $self->log('could not query the index?'), return undef if not $res->{success};
 
-    my $payload = JSON::MaybeXS->new(utf8 => 0)->decode($res->{content});
+    my $data = $res->{content};
+
+    require HTTP::Headers;
+    if (my $charset = HTTP::Headers->new(%{ $res->{headers} })->content_type_charset)
+    {
+        $data = Encode::decode($charset, $data, Encode::FB_CROAK);
+    }
+
+    my $payload = JSON::MaybeXS->new(utf8 => 0)->decode($data);
 
     $self->log('invalid payload returned?'), return undef unless $payload;
     $self->log_debug($module . ' not indexed'), return undef if not defined $payload->[0]{mod_vers};
@@ -416,7 +433,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.028
+version 0.029
 
 =head1 SYNOPSIS
 
