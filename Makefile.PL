@@ -62,7 +62,7 @@ my %WriteMakefileArgs = (
     "if" => 0,
     "lib" => 0
   },
-  "VERSION" => "0.030",
+  "VERSION" => "0.031",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -113,6 +113,8 @@ my %FallbackPrereqs = (
 # inserted by Dist::Zilla::Plugin::DynamicPrereqs 0.008
 $WriteMakefileArgs{TEST_REQUIRES}{'IO::Pty'} = $FallbackPrereqs{'IO::Pty'} = '0'
   if $^O ne 'MSWin32';
+$WriteMakefileArgs{TEST_REQUIRES}{'aliased'} = $FallbackPrereqs{'aliased'} = '0.32'
+  if $] >= 5.021006;
 
 
 

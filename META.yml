@@ -41,13 +41,13 @@ no_index:
 provides:
   Dist::Zilla::App::Command::stale:
     file: lib/Dist/Zilla/App/Command/stale.pm
-    version: '0.030'
+    version: '0.031'
   Dist::Zilla::Plugin::EnsureNotStale:
     file: lib/Dist/Zilla/Plugin/EnsureNotStale.pm
-    version: '0.030'
+    version: '0.031'
   Dist::Zilla::Plugin::PromptIfStale:
     file: lib/Dist/Zilla/Plugin/PromptIfStale.pm
-    version: '0.030'
+    version: '0.031'
 requires:
   Cwd: '0'
   Dist::Zilla::App: '0'
@@ -82,7 +82,7 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-Plugin-PromptIfStale
   homepage: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale
   repository: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale.git
-version: '0.030'
+version: '0.031'
 x_Dist_Zilla:
   perl:
     version: '5.021005'
@@ -208,6 +208,10 @@ x_Dist_Zilla:
       name: '@Author::ETHER/generate CONTRIBUTING'
       version: '0.005'
     -
+      class: Dist::Zilla::Plugin::InstallGuide
+      name: '@Author::ETHER/InstallGuide'
+      version: '1.200005'
+    -
       class: Dist::Zilla::Plugin::Test::Compile
       config:
         Dist::Zilla::Plugin::Test::Compile:
@@ -305,17 +309,6 @@ x_Dist_Zilla:
       class: Dist::Zilla::Plugin::PkgVersion
       name: '@Author::ETHER/PkgVersion'
       version: '5.025'
-    -
-      class: Dist::Zilla::Plugin::AuthorityFromModule
-      config:
-        Dist::Zilla::Plugin::AuthorityFromModule:
-          module: Dist::Zilla::Plugin::PromptIfStale
-      name: '@Author::ETHER/AuthorityFromModule'
-      version: '0.003'
-    -
-      class: Dist::Zilla::Plugin::Authority
-      name: '@Author::ETHER/Authority'
-      version: '1.009'
     -
       class: Dist::Zilla::Plugin::PodWeaver
       config:
@@ -415,6 +408,17 @@ x_Dist_Zilla:
       name: '@Author::ETHER/AutoMetaResources'
       version: '1.20'
     -
+      class: Dist::Zilla::Plugin::AuthorityFromModule
+      config:
+        Dist::Zilla::Plugin::AuthorityFromModule:
+          module: Dist::Zilla::Plugin::PromptIfStale
+      name: '@Author::ETHER/AuthorityFromModule'
+      version: '0.003'
+    -
+      class: Dist::Zilla::Plugin::Authority
+      name: '@Author::ETHER/Authority'
+      version: '1.009'
+    -
       class: Dist::Zilla::Plugin::MetaNoIndex
       name: '@Author::ETHER/MetaNoIndex'
       version: '5.025'
@@ -491,10 +495,6 @@ x_Dist_Zilla:
       name: '@Author::ETHER/MakeMaker'
       version: '5.025'
     -
-      class: Dist::Zilla::Plugin::InstallGuide
-      name: '@Author::ETHER/InstallGuide'
-      version: '1.200005'
-    -
       class: Dist::Zilla::Plugin::RunExtraTests
       config:
         Dist::Zilla::Role::TestRunner:
@@ -508,7 +508,7 @@ x_Dist_Zilla:
           finder:
             - ':InstallModules'
       name: '@Author::ETHER/CheckSelfDependency'
-      version: '0.007'
+      version: '0.008'
     -
       class: Dist::Zilla::Plugin::Run::AfterBuild
       config:
@@ -634,7 +634,7 @@ x_Dist_Zilla:
         Dist::Zilla::Plugin::Git::Tag:
           branch: ~
           signed: 0
-          tag: v0.030
+          tag: v0.031
           tag_format: v%v%t
           tag_message: v%v%t
           time_zone: local
@@ -754,7 +754,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::VerifyPhases
       name: '@Author::ETHER/PHASE VERIFICATION'
-      version: '0.006'
+      version: '0.009'
   zilla:
     class: Dist::Zilla::Dist::Builder
     config:

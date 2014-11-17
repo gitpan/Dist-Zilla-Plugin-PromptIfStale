@@ -19,9 +19,9 @@ dagolden
 lib
 Dist
 Zilla
+Plugin
+EnsureNotStale
 App
 Command
 stale
-Plugin
 PromptIfStale
-EnsureNotStale
