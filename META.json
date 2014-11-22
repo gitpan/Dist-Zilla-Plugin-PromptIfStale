@@ -4,7 +4,7 @@
       "Karen Etheridge <ether@cpan.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Dist::Zilla version 5.025, CPAN::Meta::Converter version 2.142690",
+   "generated_by" : "Dist::Zilla version 5.025, CPAN::Meta::Converter version 2.143240",
    "keywords" : [
       "prerequisites",
       "upstream",
@@ -133,6 +133,7 @@
       },
       "runtime" : {
          "requires" : {
+            "CPAN::DistnameInfo" : "0",
             "Cwd" : "0",
             "Dist::Zilla::App" : "0",
             "Dist::Zilla::Plugin::MetaResources" : "4.300039",
@@ -143,7 +144,6 @@
             "Encode" : "0",
             "HTTP::Headers" : "0",
             "HTTP::Tiny" : "0",
-            "JSON::MaybeXS" : "0",
             "List::MoreUtils" : "0",
             "List::Util" : "1.33",
             "Module::CoreList" : "3.10",
@@ -155,6 +155,7 @@
             "Parse::CPAN::Packages::Fast" : "0",
             "Path::Tiny" : "0",
             "Try::Tiny" : "0",
+            "YAML::Tiny" : "0",
             "namespace::autoclean" : "0",
             "perl" : "5.010",
             "strict" : "0",
@@ -186,15 +187,15 @@
    "provides" : {
       "Dist::Zilla::App::Command::stale" : {
          "file" : "lib/Dist/Zilla/App/Command/stale.pm",
-         "version" : "0.031"
+         "version" : "0.032"
       },
       "Dist::Zilla::Plugin::EnsureNotStale" : {
          "file" : "lib/Dist/Zilla/Plugin/EnsureNotStale.pm",
-         "version" : "0.031"
+         "version" : "0.032"
       },
       "Dist::Zilla::Plugin::PromptIfStale" : {
          "file" : "lib/Dist/Zilla/Plugin/PromptIfStale.pm",
-         "version" : "0.031"
+         "version" : "0.032"
       }
    },
    "release_status" : "stable",
@@ -212,7 +213,7 @@
       "x_IRC" : "irc://irc.perl.org/#distzilla",
       "x_MailingList" : "http://dzil.org/#mailing-list"
    },
-   "version" : "0.031",
+   "version" : "0.032",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.021005"
@@ -426,7 +427,7 @@
                }
             },
             "name" : "@Author::ETHER/Test::EOL",
-            "version" : "0.15"
+            "version" : "0.16"
          },
          {
             "class" : "Dist::Zilla::Plugin::MetaTests",
@@ -753,7 +754,7 @@
                }
             },
             "name" : "@Author::ETHER/RunExtraTests",
-            "version" : "0.024"
+            "version" : "0.025"
          },
          {
             "class" : "Dist::Zilla::Plugin::CheckSelfDependency",
@@ -842,7 +843,7 @@
          {
             "class" : "Dist::Zilla::Plugin::CheckPrereqsIndexed",
             "name" : "@Author::ETHER/CheckPrereqsIndexed",
-            "version" : "0.012"
+            "version" : "0.013"
          },
          {
             "class" : "Dist::Zilla::Plugin::TestRelease",
@@ -870,7 +871,7 @@
          {
             "class" : "Dist::Zilla::Plugin::CheckIssues",
             "name" : "@Author::ETHER/CheckIssues",
-            "version" : "0.004"
+            "version" : "0.005"
          },
          {
             "class" : "Dist::Zilla::Plugin::UploadToCPAN",
@@ -937,7 +938,7 @@
                "Dist::Zilla::Plugin::Git::Tag" : {
                   "branch" : null,
                   "signed" : 0,
-                  "tag" : "v0.031",
+                  "tag" : "v0.032",
                   "tag_format" : "v%v%t",
                   "tag_message" : "v%v%t",
                   "time_zone" : "local"

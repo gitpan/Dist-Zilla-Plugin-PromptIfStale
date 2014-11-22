@@ -20,7 +20,7 @@ configure_requires:
   ExtUtils::MakeMaker: '0'
   perl: '5.010'
 dynamic_config: 1
-generated_by: 'Dist::Zilla version 5.025, CPAN::Meta::Converter version 2.142690'
+generated_by: 'Dist::Zilla version 5.025, CPAN::Meta::Converter version 2.143240'
 keywords:
   - prerequisites
   - upstream
@@ -41,14 +41,15 @@ no_index:
 provides:
   Dist::Zilla::App::Command::stale:
     file: lib/Dist/Zilla/App/Command/stale.pm
-    version: '0.031'
+    version: '0.032'
   Dist::Zilla::Plugin::EnsureNotStale:
     file: lib/Dist/Zilla/Plugin/EnsureNotStale.pm
-    version: '0.031'
+    version: '0.032'
   Dist::Zilla::Plugin::PromptIfStale:
     file: lib/Dist/Zilla/Plugin/PromptIfStale.pm
-    version: '0.031'
+    version: '0.032'
 requires:
+  CPAN::DistnameInfo: '0'
   Cwd: '0'
   Dist::Zilla::App: '0'
   Dist::Zilla::Plugin::MetaResources: '4.300039'
@@ -59,7 +60,6 @@ requires:
   Encode: '0'
   HTTP::Headers: '0'
   HTTP::Tiny: '0'
-  JSON::MaybeXS: '0'
   List::MoreUtils: '0'
   List::Util: '1.33'
   Module::CoreList: '3.10'
@@ -71,6 +71,7 @@ requires:
   Parse::CPAN::Packages::Fast: '0'
   Path::Tiny: '0'
   Try::Tiny: '0'
+  YAML::Tiny: '0'
   namespace::autoclean: '0'
   perl: '5.010'
   strict: '0'
@@ -82,7 +83,7 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-Plugin-PromptIfStale
   homepage: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale
   repository: https://github.com/karenetheridge/Dist-Zilla-Plugin-PromptIfStale.git
-version: '0.031'
+version: '0.032'
 x_Dist_Zilla:
   perl:
     version: '5.021005'
@@ -248,7 +249,7 @@ x_Dist_Zilla:
         Dist::Zilla::Plugin::Test::EOL:
           filename: xt/author/eol.t
       name: '@Author::ETHER/Test::EOL'
-      version: '0.15'
+      version: '0.16'
     -
       class: Dist::Zilla::Plugin::MetaTests
       name: '@Author::ETHER/MetaTests'
@@ -500,7 +501,7 @@ x_Dist_Zilla:
         Dist::Zilla::Role::TestRunner:
           default_jobs: 9
       name: '@Author::ETHER/RunExtraTests'
-      version: '0.024'
+      version: '0.025'
     -
       class: Dist::Zilla::Plugin::CheckSelfDependency
       config:
@@ -563,7 +564,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::CheckPrereqsIndexed
       name: '@Author::ETHER/CheckPrereqsIndexed'
-      version: '0.012'
+      version: '0.013'
     -
       class: Dist::Zilla::Plugin::TestRelease
       name: '@Author::ETHER/TestRelease'
@@ -584,7 +585,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::CheckIssues
       name: '@Author::ETHER/CheckIssues'
-      version: '0.004'
+      version: '0.005'
     -
       class: Dist::Zilla::Plugin::UploadToCPAN
       name: '@Author::ETHER/UploadToCPAN'
@@ -634,7 +635,7 @@ x_Dist_Zilla:
         Dist::Zilla::Plugin::Git::Tag:
           branch: ~
           signed: 0
-          tag: v0.031
+          tag: v0.032
           tag_format: v%v%t
           tag_message: v%v%t
           time_zone: local

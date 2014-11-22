@@ -21,6 +21,7 @@ my %WriteMakefileArgs = (
   "MIN_PERL_VERSION" => "5.010",
   "NAME" => "Dist::Zilla::Plugin::PromptIfStale",
   "PREREQ_PM" => {
+    "CPAN::DistnameInfo" => 0,
     "Cwd" => 0,
     "Dist::Zilla::App" => 0,
     "Dist::Zilla::Plugin::MetaResources" => "4.300039",
@@ -31,7 +32,6 @@ my %WriteMakefileArgs = (
     "Encode" => 0,
     "HTTP::Headers" => 0,
     "HTTP::Tiny" => 0,
-    "JSON::MaybeXS" => 0,
     "List::MoreUtils" => 0,
     "List::Util" => "1.33",
     "Module::CoreList" => "3.10",
@@ -43,6 +43,7 @@ my %WriteMakefileArgs = (
     "Parse::CPAN::Packages::Fast" => 0,
     "Path::Tiny" => 0,
     "Try::Tiny" => 0,
+    "YAML::Tiny" => 0,
     "namespace::autoclean" => 0,
     "strict" => 0,
     "version" => 0,
@@ -62,7 +63,7 @@ my %WriteMakefileArgs = (
     "if" => 0,
     "lib" => 0
   },
-  "VERSION" => "0.031",
+  "VERSION" => "0.032",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -70,6 +71,7 @@ my %WriteMakefileArgs = (
 
 
 my %FallbackPrereqs = (
+  "CPAN::DistnameInfo" => 0,
   "Cwd" => 0,
   "Dist::Zilla::App" => 0,
   "Dist::Zilla::App::Tester" => 0,
@@ -84,7 +86,6 @@ my %FallbackPrereqs = (
   "File::pushd" => 0,
   "HTTP::Headers" => 0,
   "HTTP::Tiny" => 0,
-  "JSON::MaybeXS" => 0,
   "List::MoreUtils" => 0,
   "List::Util" => "1.33",
   "Module::CoreList" => "3.10",
@@ -102,6 +103,7 @@ my %FallbackPrereqs = (
   "Test::Fatal" => 0,
   "Test::More" => 0,
   "Try::Tiny" => 0,
+  "YAML::Tiny" => 0,
   "if" => 0,
   "lib" => 0,
   "namespace::autoclean" => 0,
@@ -113,8 +115,6 @@ my %FallbackPrereqs = (
 # inserted by Dist::Zilla::Plugin::DynamicPrereqs 0.008
 $WriteMakefileArgs{TEST_REQUIRES}{'IO::Pty'} = $FallbackPrereqs{'IO::Pty'} = '0'
   if $^O ne 'MSWin32';
-$WriteMakefileArgs{TEST_REQUIRES}{'aliased'} = $FallbackPrereqs{'aliased'} = '0.32'
-  if $] >= 5.021006;
 
 
 

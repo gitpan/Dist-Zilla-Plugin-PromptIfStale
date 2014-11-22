@@ -1,8 +1,8 @@
 use strict;
 use warnings;
 package Dist::Zilla::Plugin::PromptIfStale;
-# git description: v0.030-2-gbb30871
-$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.031';
+# git description: v0.031-4-g73de857
+$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.032';
 # ABSTRACT: Check at build/release time if modules are out of date
 # KEYWORDS: prerequisites upstream dependencies modules metadata update stale
 # vim: set ts=8 sw=4 tw=78 et :
@@ -19,8 +19,9 @@ use List::MoreUtils 'uniq';
 use version;
 use Path::Tiny;
 use Cwd;
+use CPAN::DistnameInfo;
 use HTTP::Tiny;
-use JSON::MaybeXS;
+use YAML::Tiny;
 use Module::Path 0.15 'module_path';
 use Module::Metadata;
 use Module::CoreList 3.10;  # includes information about the 5.20.0 release
@@ -167,9 +168,9 @@ sub stale_modules
 
         # ignore modules in the dist currently being built
         my $relative_path = path($path)->relative(getcwd);
-        $self->log_debug($module . ' provided locally (at ' . $relative_path
-                . '); skipping version check'),
-                $already_checked{$module}++
+        $already_checked{$module}++,
+            $self->log_debug([ '%s provided locally (at %s); skipping version check',
+                $module, $relative_path->stringify ])
             unless $relative_path =~ m/^\.\./;
     }
 
@@ -180,9 +181,8 @@ sub stale_modules
         my $indexed_version = $self->_indexed_version($module, !!(@modules > 5));
         my $local_version = Module::Metadata->new_from_file($module_to_filename{$module})->version;
 
-        $self->log_debug('comparing indexed vs. local version for ' . $module
-            . ': indexed=' . ($indexed_version // 'undef')
-            . '; local version=' . ($local_version // 'undef'));
+        $self->log_debug([ 'comparing indexed vs. local version for %s: indexed=%s; local version=%s',
+            $module, sub { ($indexed_version // 'undef') . '' }, sub { ($local_version // 'undef') . '' } ]);
 
         if (not defined $indexed_version)
         {
@@ -199,9 +199,9 @@ sub stale_modules
 
             if (Module::CoreList::is_core($module) and not $self->_is_duallifed($module))
             {
-                $self->log_debug('core module ' . $module . ' is indexed at version '
-                    . $indexed_version . ' but you only have ' . $local_version
-                    . ' installed. You need to use update your perl to get the latest version.');
+                $self->log_debug([ 'core module %s is indexed at version %s but you only have %s installed. You need to use update your perl to get the latest version.',
+                    $module, $indexed_version, $local_version,
+                ]);
             }
             else
             {
@@ -331,7 +331,9 @@ sub _is_duallifed
     # cpan dist for dual-lifed modules that are more recent in core than on
     # CPAN (e.g. Carp in June 2014 is 1.34 in 5.20.0 but 1.3301 on cpan).
 
-    my $res = HTTP::Tiny->new->get("http://cpanidx.org/cpanidx/json/mod/$module");
+    my $url = 'http://cpanmetadb.plackperl.org/v1.0/package/' . $module;
+    $self->log_debug([ 'fetching %s', $url ]);
+    my $res = HTTP::Tiny->new->get($url);
     $self->log('could not query the index?'), return undef if not $res->{success};
 
     my $data = $res->{content};
@@ -342,11 +344,11 @@ sub _is_duallifed
         $data = Encode::decode($charset, $data, Encode::FB_CROAK);
     }
 
-    my $payload = JSON::MaybeXS->new(utf8 => 0)->decode($data);
+    my $payload = YAML::Tiny->read_string($data);
 
     $self->log('invalid payload returned?'), return undef unless $payload;
-    $self->log_debug($module . ' not indexed'), return undef if not defined $payload->[0]{dist_name};
-    $payload->[0]{dist_name} ne 'perl';
+    $self->log_debug([ '%s not indexed', $module ]), return undef if not defined $payload->[0]{dist_name};
+    CPAN::DistnameInfo->new($payload->[0]{dist_name})->dist ne 'perl';
 }
 
 my $packages;
@@ -369,7 +371,9 @@ sub _indexed_version_via_query
 
     die 'should not be here - get 02packages instead' if $self->index_base_url;
 
-    my $res = HTTP::Tiny->new->get("http://cpanidx.org/cpanidx/json/mod/$module");
+    my $url = 'http://cpanmetadb.plackperl.org/v1.0/package/' . $module;
+    $self->log_debug([ 'fetching %s', $url ]);
+    my $res = HTTP::Tiny->new->get($url);
     $self->log('could not query the index?'), return undef if not $res->{success};
 
     my $data = $res->{content};
@@ -379,12 +383,13 @@ sub _indexed_version_via_query
     {
         $data = Encode::decode($charset, $data, Encode::FB_CROAK);
     }
+    $self->log_debug([ 'got response: %s', $data ]);
 
-    my $payload = JSON::MaybeXS->new(utf8 => 0)->decode($data);
+    my $payload = YAML::Tiny->read_string($data);
 
     $self->log('invalid payload returned?'), return undef unless $payload;
-    $self->log_debug($module . ' not indexed'), return undef if not defined $payload->[0]{mod_vers};
-    version->parse($payload->[0]{mod_vers});
+    $self->log_debug([ '%s not indexed', $module ]), return undef if not defined $payload->[0]{version};
+    version->parse($payload->[0]{version});
 }
 
 # TODO: it would be AWESOME to provide this to multiple plugins via a role
@@ -401,7 +406,9 @@ sub _get_packages
 
     my $base = $self->index_base_url || 'http://www.cpan.org';
 
-    my $response = HTTP::Tiny->new->mirror($base . '/modules/' . $filename, $path);
+    my $url = $base . '/modules/' . $filename;
+    $self->log_debug([ 'fetching %s', $url ]);
+    my $response = HTTP::Tiny->new->mirror($url, $path);
     $self->log('could not fetch the index - network down?'), return undef if not $response->{success};
 
     require Parse::CPAN::Packages::Fast;
@@ -433,7 +440,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.031
+version 0.032
 
 =head1 SYNOPSIS
 
