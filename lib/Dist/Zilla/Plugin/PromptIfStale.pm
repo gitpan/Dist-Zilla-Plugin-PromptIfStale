@@ -1,12 +1,10 @@
 use strict;
 use warnings;
-package Dist::Zilla::Plugin::PromptIfStale;
-# git description: v0.031-4-g73de857
-$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.032';
+package Dist::Zilla::Plugin::PromptIfStale; # git description: v0.032-6-g8260f8c
 # ABSTRACT: Check at build/release time if modules are out of date
 # KEYWORDS: prerequisites upstream dependencies modules metadata update stale
 # vim: set ts=8 sw=4 tw=78 et :
-
+$Dist::Zilla::Plugin::PromptIfStale::VERSION = '0.033';
 use Moose;
 with 'Dist::Zilla::Role::BeforeBuild',
     'Dist::Zilla::Role::AfterBuild',
@@ -22,8 +20,8 @@ use Cwd;
 use CPAN::DistnameInfo;
 use HTTP::Tiny;
 use YAML::Tiny;
-use Module::Path 0.15 'module_path';
-use Module::Metadata;
+use Module::Path 0.18 'module_path';
+use Module::Metadata 1.000023;
 use Module::CoreList 3.10;  # includes information about the 5.20.0 release
 use Encode ();
 use namespace::autoclean;
@@ -343,6 +341,7 @@ sub _is_duallifed
     {
         $data = Encode::decode($charset, $data, Encode::FB_CROAK);
     }
+    $self->log_debug([ 'got response: %s', $data ]);
 
     my $payload = YAML::Tiny->read_string($data);
 
@@ -440,7 +439,7 @@ Dist::Zilla::Plugin::PromptIfStale - Check at build/release time if modules are 
 
 =head1 VERSION
 
-version 0.032
+version 0.033
 
 =head1 SYNOPSIS
 

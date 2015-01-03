@@ -80,6 +80,9 @@ my @modules_checked;
 
         diag 'got stderr output: ' . $result->stderr
             if $result->stderr;
+
+        diag 'got result: ', explain $result
+            if not Test::Builder->new->is_passing;
     }
 
     Dist::Zilla::Plugin::PromptIfStale::__clear_already_checked();
@@ -90,7 +93,7 @@ my @modules_checked;
         is($result->exit_code, 0, 'dzil would have exited 0');
         is($result->error, undef, 'no errors');
         is(
-            $result->output,
+            $result->stdout,
             join("\n", 'Carp', (map { 'Foo' . $_ } ('0' .. '8'))) . "\n",
             'stale prereqs and authordeps found with --all, despite no PromptIfStale plugins configured',
         );
@@ -100,6 +103,9 @@ my @modules_checked;
             set( 'Carp', re(qr/^Dist::Zilla::Plugin::/) ),
             'indexed versions of plugins were checked',
         ) or diag 'checked modules: ', explain \@modules_checked;
+
+        diag 'got stderr output: ' . $result->stderr
+            if $result->stderr;
 
         diag 'got result: ', explain $result
             if not Test::Builder->new->is_passing;
